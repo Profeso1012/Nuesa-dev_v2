@@ -3,6 +3,16 @@ import { useState } from 'react';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [deptDropdown, setDeptDropdown] = useState(false);
+
+  const departments = [
+    { name: 'Mechanical Engineering', slug: 'mechanical' },
+    { name: 'Aerospace Engineering', slug: 'aerospace' },
+    { name: 'Chemical Engineering', slug: 'chemical' },
+    { name: 'Electronics & Computer Engineering', slug: 'electronics-computer' },
+    { name: 'Civil Engineering', slug: 'civil' },
+    { name: 'Industrial Engineering', slug: 'industrial' },
+  ];
 
   return (
     <header className="w-full bg-white border-b border-[#9BBBE5] shadow-sm">
@@ -23,12 +33,27 @@ export default function Header() {
           <Link href="/" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">Home</Link>
           <Link href="/about" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">About</Link>
           <Link href="/events" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">Events</Link>
-          <Link href="/departments" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded flex items-center gap-1">
-            Departments
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </Link>
+          <div className="relative" onMouseEnter={() => setDeptDropdown(true)} onMouseLeave={() => setDeptDropdown(false)}>
+            <button className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded flex items-center gap-1">
+              Departments
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            {deptDropdown && (
+              <div className="absolute top-full left-0 mt-1 w-64 bg-white shadow-lg rounded-lg border border-gray-200 py-2 z-50">
+                {departments.map((dept) => (
+                  <Link
+                    key={dept.slug}
+                    href={`/departments/${dept.slug}`}
+                    className="block px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    {dept.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           <Link href="/elibrary" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">E-library</Link>
         </nav>
 

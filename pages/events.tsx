@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import StayInTheLoop from '../components/StayInTheLoop';
@@ -6,6 +6,7 @@ import StayInTheLoop from '../components/StayInTheLoop';
 export default function Events() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [activeThumbIndex, setActiveThumbIndex] = useState(0);
 
   const events = [
     {
@@ -34,19 +35,44 @@ export default function Events() {
     },
   ];
 
-  const galleries = [
+  const allGalleryImages = [
     {
-      mainImage: 'https://api.builder.io/api/v1/image/assets/TEMP/31c91664892725e38b775899aa15b6d5119f844a?width=3072',
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/31c91664892725e38b775899aa15b6d5119f844a?width=3072',
       title: 'NUESA LASU Tech Expo 1.0',
       date: 'July 2025.',
-      thumbnails: [
-        'https://api.builder.io/api/v1/image/assets/TEMP/0e18bad089f58b090377197d1552ec3900efc20f?width=586',
-        'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-        'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-        'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-      ],
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/0e18bad089f58b090377197d1552ec3900efc20f?width=586',
+      title: 'NUESA LASU Tech Expo 1.0',
+      date: 'July 2025.',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
+      title: 'NUESA LASU Tech Expo 1.0',
+      date: 'July 2025.',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
+      title: 'NUESA LASU Tech Expo 1.0',
+      date: 'July 2025.',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
+      title: 'NUESA LASU Tech Expo 1.0',
+      date: 'July 2025.',
     },
   ];
+
+  // Auto-cycle carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveThumbIndex((prev) => (prev + 1) % allGalleryImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [allGalleryImages.length]);
+
+  const mainImage = allGalleryImages[activeThumbIndex];
+  const thumbnails = allGalleryImages.filter((_, idx) => idx !== activeThumbIndex);
 
   return (
     <div className="min-h-screen bg-white">
@@ -131,38 +157,42 @@ export default function Events() {
       {/* EVENT PHOTO GALLERY */}
       <section className="w-full py-16 md:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 md:px-24">
-          <h2 className="text-3xl md:text-4xl font-medium mb-10">
+          <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
             Event <span className="text-[#C45D16]">Photo Gallery</span>
           </h2>
 
           {/* MAIN GALLERY IMAGE */}
           <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
             <img
-              src={galleries[galleryIndex].mainImage}
+              src={mainImage.image}
               alt="Event Gallery"
               className="w-full h-auto max-h-[630px] object-cover"
             />
             <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
               <h3 className="text-white text-2xl md:text-3xl font-medium">
-                {galleries[galleryIndex].title}
+                {mainImage.title}
               </h3>
               <p className="text-white text-xl md:text-2xl font-medium">
-                {galleries[galleryIndex].date}
+                {mainImage.date}
               </p>
             </div>
           </div>
 
           {/* THUMBNAIL GALLERY */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-10">
-            {galleries[galleryIndex].thumbnails.map((thumb, idx) => (
+            {thumbnails.map((thumb, idx) => (
               <div
                 key={idx}
-                className={`relative rounded-2xl overflow-hidden cursor-pointer transition-all ${
-                  idx === 0 ? 'border-4 border-[#212121]' : 'border border-[#C45D16]'
+                onClick={() => {
+                  const originalIndex = allGalleryImages.findIndex(img => img.image === thumb.image);
+                  setActiveThumbIndex(originalIndex);
+                }}
+                className={`relative overflow-hidden cursor-pointer transition-all ${
+                  idx === 0 ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
                 }`}
               >
                 <img
-                  src={thumb}
+                  src={thumb.image}
                   alt={`Gallery thumbnail ${idx + 1}`}
                   className="w-full h-56 object-cover"
                 />
