@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import StayInTheLoop from "../components/StayInTheLoop";
 
 export default function About() {
   const [leadersIndex, setLeadersIndex] = useState(0);
@@ -407,6 +408,9 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      {/* STAY IN THE LOOP */}
+      <StayInTheLoop />
 
       <Footer />
     </div>
