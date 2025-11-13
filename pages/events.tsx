@@ -63,6 +63,35 @@ export default function Events() {
     },
   ];
 
+  // ======= PHOTO NEWS DATA =======
+  const allPhotoNewsImages = [
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/6a1b12b8c5312c9139a24c0e6b7a7f56a3bcd987?width=3072',
+      title: 'Engineering Students Excel at National Innovation Summit',
+      date: 'October 2025',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/f214a8c641e6a952d3b0cba5e1df0a847f3b3e8d?width=586',
+      title: 'NUESA Hosts Career Tech Talk Series',
+      date: 'September 2025',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/54b61a2a88e8b0a4b67b9b0b4a8453d72e65e019?width=586',
+      title: 'Students Participate in AI & Robotics Challenge',
+      date: 'August 2025',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a27c0f4983a4c293dcb8c414a5275c65b7895f9?width=586',
+      title: 'NUESA LASU Team Visits Dangote Refinery',
+      date: 'July 2025',
+    },
+    {
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/47a64bcb731b42bba8d42d1a3cc4c28cf65af29a?width=586',
+      title: 'Engineering Week 2025 Highlights and Awards',
+      date: 'June 2025',
+    },
+  ];
+
   // Auto-cycle carousel
   useEffect(() => {
     const interval = setInterval(() => {
@@ -194,6 +223,62 @@ export default function Events() {
                 <img
                   src={thumb.image}
                   alt={`Gallery thumbnail ${idx + 1}`}
+                  className="w-full h-56 object-cover"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* PAGINATION DOTS */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
+          </div>
+        </div>
+      </section>
+
+    // ======= PHOTO NEWS COMPONENT =======
+      <section className="w-full py-16 md:py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 md:px-24">
+          <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
+            Photo <span className="text-[#C45D16]">News</span>
+          </h2>
+
+          {/* MAIN IMAGE */}
+          <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
+            <img
+              src={mainImage.image}
+              alt="Photo News"
+              className="w-full h-auto max-h-[630px] object-cover"
+            />
+            <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
+              <h3 className="text-white text-2xl md:text-3xl font-medium">
+                {mainImage.title}
+              </h3>
+              <p className="text-white text-xl md:text-2xl font-medium">
+                {mainImage.date}
+              </p>
+            </div>
+          </div>
+
+          {/* THUMBNAIL GRID */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-10">
+            {thumbnails.map((thumb, idx) => (
+              <div
+                key={idx}
+                onClick={() => {
+                  const originalIndex = allPhotoNewsImages.findIndex(
+                    img => img.image === thumb.image
+                  );
+                  setActiveThumbIndex(originalIndex);
+                }}
+                className={`relative overflow-hidden cursor-pointer transition-all ${idx === 0 ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
+                  }`}
+              >
+                <img
+                  src={thumb.image}
+                  alt={`Photo news thumbnail ${idx + 1}`}
                   className="w-full h-56 object-cover"
                 />
               </div>
