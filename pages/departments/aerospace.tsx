@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import StayInTheLoop from '../../components/StayInTheLoop';
+import BackgroundDecor from '../../components/BackgroundDecor';
 
 export default function AerospaceDepartment() {
   const [lecturerIndex, setLecturerIndex] = useState(0);
@@ -69,8 +70,11 @@ export default function AerospaceDepartment() {
   }));
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
+    <div className="min-h-screen bg-white relative">
+      <BackgroundDecor />
+
+      <div className="relative z-10">
+        <Header />
 
       {/* HERO SECTION */}
       <section className="w-full py-16 md:py-20">
@@ -190,9 +194,14 @@ export default function AerospaceDepartment() {
       </section>
 
       {/* STAY IN THE LOOP */}
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <StayInTheLoop />
 
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <Footer />
+      </div>
     </div>
   );
 }
