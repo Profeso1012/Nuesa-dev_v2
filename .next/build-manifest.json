@@ -27,20 +27,25 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/about": [
+    "/admin/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/about.js"
+      "static/chunks/pages/admin/dashboard.js"
     ],
-    "/departments/aerospace": [
+    "/departments/chemical": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/departments/aerospace.js"
+      "static/chunks/pages/departments/chemical.js"
     ],
-    "/events": [
+    "/departments/electronics-computer": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/events.js"
+      "static/chunks/pages/departments/electronics-computer.js"
+    ],
+    "/login": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/login.js"
     ]
   },
   "ampFirstPages": []

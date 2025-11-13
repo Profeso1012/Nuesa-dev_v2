@@ -3,8 +3,9 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/about": "pages/about.js",
   "/departments/aerospace": "pages/departments/aerospace.js",
-  "/api/lecturers": "pages/api/lecturers.js",
-  "/events": "pages/events.js"
+  "/departments/chemical": "pages/departments/chemical.js",
+  "/departments/electronics-computer": "pages/departments/electronics-computer.js",
+  "/admin/dashboard": "pages/admin/dashboard.js",
+  "/login": "pages/login.js"
 }
