@@ -4,34 +4,7 @@ import Footer from '../../components/Footer';
 import StayInTheLoop from '../../components/StayInTheLoop';
 import BackgroundDecor from '../../components/BackgroundDecor';
 import ComingSoonSection from '../../components/ComingSoonSection';
-import { motion } from "framer-motion";
-import { FaTools, FaRocket, FaCogs, FaHourglassHalf } from "react-icons/fa";
-
-interface Lecturer {
-  id: string;
-  name: string;
-  specialization: string;
-  image_url: string;
-  courses?: any[];
-}
-
-const departmentNames: Record<string, string> = {
-  'aerospace': 'Aerospace Engineering',
-  'mechanical': 'Mechanical Engineering',
-  'chemical': 'Chemical Engineering',
-  'electronics-computer': 'Electronics & Computer Engineering',
-  'civil': 'Civil Engineering',
-  'industrial': 'Industrial Engineering',
-};
-
-const departmentAbbrev: Record<string, string> = {
-  'aerospace': 'ASE',
-  'mechanical': 'ME',
-  'chemical': 'CHE',
-  'electronics-computer': 'ECE',
-  'civil': 'CVE',
-  'industrial': 'IE',
-};
+import { departmentNames, departmentAbbrev, Lecturer } from '../../lib/departmentUtils';
 
 export default function AerospaceDepartment() {
   const [lecturerIndex, setLecturerIndex] = useState(0);
