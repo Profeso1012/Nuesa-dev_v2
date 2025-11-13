@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { supabase } from '../lib/supabaseClient';
+import StayInTheLoop from '../components/StayInTheLoop';
 
 interface Partner {
   id: string;
@@ -229,6 +230,10 @@ export default function Partnerships() {
 
       {/* Orange Spacing Before Footer */}
       <div className="w-full bg-[rgba(196,93,22,0.2)]" style={{ height: '1px' }}></div>
+
+      {/* STAY IN THE LOOP */}
+      <StayInTheLoop />
+
 
       <Footer />
     </div>
