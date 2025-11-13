@@ -169,11 +169,8 @@ export default function CivilDepartment() {
         </div>
       </section>
 
-      <div className="w-full bg-[#E6731F] h-2"></div>
-
       <StayInTheLoop />
-
-      <div className="w-full bg-[#E6731F] h-2"></div>
+      <div className="w-full bg-[#E6731F] h-20"></div>
 
       <Footer />
       </div>
