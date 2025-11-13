@@ -19,7 +19,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 md:px-24 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <img 
-            src="https://api.builder.io/api/v1/image/assets/TEMP/f63c9f0843d1fa4c98224886a4f06161bc5ab51f?width=97" 
+            src="https://api.builder.io/api/v1/image/assets/TEMP/8daa62c44e137d724c296a6b2aaf25f3123e1f0a?width=97" 
             alt="NUESA LASU Logo" 
             className="w-12 h-12" 
             style={{ fontFamily: 'Roboto, sans-serif' }}
@@ -35,7 +35,7 @@ export default function Header() {
           <Link href="/events" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">Events</Link>
           <div className="relative" onMouseEnter={() => setDeptDropdown(true)} onMouseLeave={() => setDeptDropdown(false)}>
             <button className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded flex items-center gap-1">
-              Departments
+              Aerospace Engineering
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -54,15 +54,14 @@ export default function Header() {
               </div>
             )}
           </div>
-          <Link href="/elibrary" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">E-library</Link>
+          <Link href="/partnerships" className="px-2.5 py-1.5 text-sm font-medium text-white bg-[#C45D16] rounded">
+            Partnerships
+          </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <Link href="/contact" className="px-8 py-3.5 border border-[#E6731F] text-[#E6731F] rounded text-sm font-semibold shadow-sm">
             Contact Faculty Admin
-          </Link>
-          <Link href="/login" className="px-8 py-3.5 bg-[#E6731F] text-white rounded text-sm font-semibold shadow-sm">
-            Lecturer Login
           </Link>
         </div>
 
@@ -88,7 +87,7 @@ export default function Header() {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2.5">
               <img 
-                src="https://api.builder.io/api/v1/image/assets/TEMP/f63c9f0843d1fa4c98224886a4f06161bc5ab51f?width=97" 
+                src="https://api.builder.io/api/v1/image/assets/TEMP/8daa62c44e137d724c296a6b2aaf25f3123e1f0a?width=97" 
                 alt="NUESA LASU Logo" 
                 className="w-10 h-10" 
               />
@@ -102,17 +101,14 @@ export default function Header() {
             <Link href="/about" className="font-medium text-sm py-2 hover:text-[#5B933C]">About</Link>
             <Link href="/events" className="font-medium text-sm py-2 hover:text-[#5B933C]">Events</Link>
             <Link href="/departments" className="font-medium text-sm py-2 hover:text-[#5B933C] flex items-center gap-1">
-              Departments
+              Aerospace Engineering
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </Link>
-            <Link href="/elibrary" className="font-medium text-sm py-2 hover:text-[#5B933C]">E-library</Link>
+            <Link href="/partnerships" className="font-medium text-sm py-2 hover:text-[#5B933C]">Partnerships</Link>
             <Link href="/contact" className="mt-4 px-3 py-2 border border-[#E6731F] text-[#E6731F] rounded text-center text-sm font-semibold">
               Contact Faculty Admin
-            </Link>
-            <Link href="/login" className="px-3 py-2 bg-[#E6731F] text-white rounded text-center text-sm font-semibold">
-              Lecturer Login
             </Link>
           </nav>
         </div>
