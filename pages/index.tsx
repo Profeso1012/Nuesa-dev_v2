@@ -4,7 +4,9 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AboutUsSection from '../components/AboutUsSection';
 import StayInTheLoop from '../components/StayInTheLoop';
-import BackgroundDecor from '../components/BackgroundDecor';
+
+
+
 
 export default function Home() {
 
@@ -42,11 +44,8 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-white font-roboto relative">
-      <BackgroundDecor />
-
-      <div className="relative z-10">
-        <Header />
+    <div className="min-h-screen bg-white font-roboto">
+      <Header />
 
       {/* HERO */}
       <section className="w-full">
@@ -222,7 +221,7 @@ export default function Home() {
               <div className="p-5">
                 <h4 className="text-[#5B933C] font-medium">E-library Launching</h4>
                 <p className="text-[#212121] font-semibold">Flagship Event</p>
-                <p className="mt-3 text-sm text-[#4B5563]">Date: 6th of November, 2025<br/>Time: 10:00am<br/>Venue: Faculty of Engineering Lecture Theatre</p>
+                <p className="mt-3 text-sm text-[#4B5563]">Date: 6th of November, 2025<br />Time: 10:00am<br />Venue: Faculty of Engineering Lecture Theatre</p>
                 <div className="mt-4">
                   <button className="text-[#E6731F] border border-[#E6731F] px-3 py-2 rounded text-sm font-semibold">Register Now</button>
                 </div>
@@ -237,14 +236,9 @@ export default function Home() {
       </section>
 
       {/* STAY IN THE LOOP */}
-      <div className="w-full bg-[#E6731F] h-2"></div>
-
       <StayInTheLoop />
 
-      <div className="w-full bg-[#E6731F] h-2"></div>
-
       <Footer />
-      </div>
     </div>
   );
 }
