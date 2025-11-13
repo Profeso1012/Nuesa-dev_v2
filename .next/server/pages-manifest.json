@@ -4,5 +4,6 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/events": "pages/events.js",
-  "/about": "pages/about.js"
+  "/departments/mechanical": "pages/departments/mechanical.js",
+  "/departments/aerospace": "pages/departments/aerospace.js"
 }
