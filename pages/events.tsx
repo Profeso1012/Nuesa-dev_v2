@@ -63,7 +63,6 @@ export default function Events() {
     },
   ];
 
-  // ======= PHOTO NEWS DATA =======
   const allPhotoNewsImages = [
     {
       image: 'https://api.builder.io/api/v1/image/assets/TEMP/6a1b12b8c5312c9139a24c0e6b7a7f56a3bcd987?width=3072',
@@ -238,7 +237,7 @@ export default function Events() {
         </div>
       </section>
 
-    // ======= PHOTO NEWS COMPONENT =======
+      {/* PHOTO NEWS GALLERY */}
       <section className="w-full py-16 md:py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6 md:px-24">
           <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
