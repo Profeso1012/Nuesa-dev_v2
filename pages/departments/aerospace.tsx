@@ -1,78 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import StayInTheLoop from '../../components/StayInTheLoop';
 import BackgroundDecor from '../../components/BackgroundDecor';
 import ComingSoonSection from '../../components/ComingSoonSection';
-
-
 import { motion } from "framer-motion";
 import { FaTools, FaRocket, FaCogs, FaHourglassHalf } from "react-icons/fa";
+
+interface Lecturer {
+  id: string;
+  name: string;
+  specialization: string;
+  image_url: string;
+  courses?: any[];
+}
+
+const departmentNames: Record<string, string> = {
+  'aerospace': 'Aerospace Engineering',
+  'mechanical': 'Mechanical Engineering',
+  'chemical': 'Chemical Engineering',
+  'electronics-computer': 'Electronics & Computer Engineering',
+  'civil': 'Civil Engineering',
+  'industrial': 'Industrial Engineering',
+};
+
+const departmentAbbrev: Record<string, string> = {
+  'aerospace': 'ASE',
+  'mechanical': 'ME',
+  'chemical': 'CHE',
+  'electronics-computer': 'ECE',
+  'civil': 'CVE',
+  'industrial': 'IE',
+};
 
 export default function AerospaceDepartment() {
   const [lecturerIndex, setLecturerIndex] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState('all');
+  const [lecturers, setLecturers] = useState<Lecturer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const dept = 'aerospace';
+  const deptName = departmentNames[dept];
+  const deptCode = departmentAbbrev[dept];
 
-  const lecturers = [
-    {
-      name: 'Dr Olofinkua Joseph',
-      specialization: 'Propulsion Engineering',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/86769e554b9e8dd4e432c4f3fd92b469a1c60d98?width=200',
-      courses: [
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-      ],
-    },
-    {
-      name: 'Dr Olofinkua Joseph',
-      specialization: 'Propulsion Engineering',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/86769e554b9e8dd4e432c4f3fd92b469a1c60d98?width=200',
-      courses: [
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-      ],
-    },
-    {
-      name: 'Dr Olofinkua Joseph',
-      specialization: 'Propulsion Engineering',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/ad33659c33381eac40061641b81f19d65a13ad9f?width=200',
-      courses: [
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-        'ASE 205 [Propulsion Engineering]',
-      ],
-    },
-  ];
+  useEffect(() => {
+    fetchLecturers();
+  }, []);
 
-  const coursesByLevel = {
-    '100': ['ASE 105 [Propulsion Engineering]'],
-    '200': ['ASE 205 [Propulsion Engineering]'],
-    '300': ['ASE 305 [Propulsion Engineering]'],
-    '400': ['ASE 405 [Propulsion Engineering]'],
-    '500': ['ASE 505 [Propulsion Engineering]'],
+  const fetchLecturers = async () => {
+    try {
+      const response = await fetch(`/api/lecturers?department=${dept}`);
+      if (!response.ok) throw new Error('Failed to fetch lecturers');
+      const data = await response.json();
+      setLecturers(data || []);
+    } catch (err: any) {
+      setError(err.message);
+      setLecturers([]);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const allCourses = Array(15).fill(null).map((_, idx) => ({
-    '100': idx < 12 ? 'ASE 105\n[Propulsion Engineering]' : 'NIL',
-    '200': 'ASE 205\n[Propulsion Engineering]',
-    '300': 'ASE 305\n[Propulsion Engineering]',
-    '400': 'ASE 405\n[Propulsion Engineering]',
-    '500': 'ASE 505\n[Propulsion Engineering]',
-  }));
 
   return (
     <div className="min-h-screen bg-white relative">
