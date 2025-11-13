@@ -2,10 +2,5 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/departments/aerospace": "pages/departments/aerospace.js",
-  "/departments/chemical": "pages/departments/chemical.js",
-  "/departments/electronics-computer": "pages/departments/electronics-computer.js",
-  "/admin/dashboard": "pages/admin/dashboard.js",
-  "/login": "pages/login.js"
+  "/": "pages/index.js"
 }
