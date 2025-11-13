@@ -335,11 +335,10 @@ export default function About() {
       </section>
 
       {/* STAY IN THE LOOP */}
-      <div className="w-full bg-[#E6731F] h-2"></div>
 
       <StayInTheLoop />
 
-      <div className="w-full bg-[#E6731F] h-2"></div>
+      <div className="w-full bg-[#E6731F] h-6"></div>
 
       <Footer />
       </div>
