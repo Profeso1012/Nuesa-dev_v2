@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Header() {
@@ -15,6 +15,16 @@ export default function Header() {
     { name: 'Civil Engineering', slug: 'civil' },
     { name: 'Industrial Engineering', slug: 'industrial' },
   ];
+
+  const currentDeptName = useMemo(() => {
+    const pathname = router.pathname;
+    if (pathname.startsWith('/departments/')) {
+      const slug = pathname.replace('/departments/', '');
+      const dept = departments.find(d => d.slug === slug);
+      return dept?.name || 'Departments';
+    }
+    return 'Departments';
+  }, [router.pathname]);
 
   const isActive = (path: string) => {
     return router.pathname === path;
