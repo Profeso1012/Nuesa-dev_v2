@@ -23,10 +23,12 @@ interface Lecturer {
 interface Event {
   id: string;
   title: string;
-  description: string;
-  department: string;
+  category: string;
+  date: string;
+  time: string;
+  venue: string;
+  form_link: string | null;
   image_url: string;
-  event_date: string;
   created_at: string;
 }
 
@@ -34,7 +36,8 @@ interface GalleryItem {
   id: string;
   title: string;
   description: string;
-  department: string;
+  type: 'news_photo' | 'event_photo';
+  date: string;
   image_url: string;
   created_at: string;
 }
@@ -80,17 +83,19 @@ const departments = [
 
 const positions = ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5', 'Post 6', 'Post 7', 'Post 8', 'Post 9'];
 const councils = ['SEC', 'SPC'];
+const galleryTypes = [
+  { value: 'news_photo', label: 'News Photo' },
+  { value: 'event_photo', label: 'Event Photo' },
+];
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('partners');
   const [token, setToken] = useState<string>('');
   
-  // Partner state
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartnerName, setNewPartnerName] = useState('');
   const [newPartnerUrl, setNewPartnerUrl] = useState('');
 
-  // Lecturer state
   const [lecturers, setLecturers] = useState<Lecturer[]>([]);
   const [lecturerForm, setLecturerForm] = useState({
     name: '',
@@ -100,28 +105,28 @@ export default function AdminDashboard() {
   });
   const [editingLecturerId, setEditingLecturerId] = useState<string | null>(null);
 
-  // Event state
   const [events, setEvents] = useState<Event[]>([]);
   const [eventForm, setEventForm] = useState({
     title: '',
-    description: '',
-    department: 'aerospace',
+    category: '',
+    date: '',
+    time: '',
+    venue: '',
+    form_link: '',
     image_url: '',
-    event_date: '',
   });
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
-  // Gallery state
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [galleryForm, setGalleryForm] = useState({
     title: '',
     description: '',
-    department: 'aerospace',
+    type: 'news_photo' as 'news_photo' | 'event_photo',
+    date: '',
     image_url: '',
   });
   const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
 
-  // Executive state
   const [executives, setExecutives] = useState<Executive[]>([]);
   const [executiveForm, setExecutiveForm] = useState({
     name: '',
@@ -135,7 +140,6 @@ export default function AdminDashboard() {
   });
   const [editingExecutiveId, setEditingExecutiveId] = useState<string | null>(null);
 
-  // Department Admin state
   const [departmentAdmins, setDepartmentAdmins] = useState<DepartmentAdmin[]>([]);
   const [departmentAdminForm, setDepartmentAdminForm] = useState({
     name: '',
@@ -145,7 +149,6 @@ export default function AdminDashboard() {
   });
   const [editingDepartmentAdminId, setEditingDepartmentAdminId] = useState<string | null>(null);
 
-  // Admin Users state
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -224,7 +227,7 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('event_date', { ascending: false });
+        .order('date', { ascending: false });
 
       if (error) throw error;
       setEvents(data || []);
@@ -240,7 +243,7 @@ export default function AdminDashboard() {
       const { data, error } = await supabase
         .from('gallery_items')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('date', { ascending: false });
 
       if (error) throw error;
       setGalleryItems(data || []);
@@ -303,18 +306,18 @@ export default function AdminDashboard() {
 
   const handleAddPartner = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (partners.length >= 4) {
-      alert('Maximum of 4 partners allowed.');
-      return;
-    }
-
     setUploading(true);
     try {
-      const { error } = await supabase
-        .from('partners')
-        .insert([{ name: newPartnerName, logo_url: newPartnerUrl }]);
+      const response = await fetch('/api/admin/partners', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: newPartnerName, logo_url: newPartnerUrl }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to add partner');
       setNewPartnerName('');
       setNewPartnerUrl('');
       fetchPartners();
@@ -330,15 +333,19 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this partner?')) return;
 
     try {
-      const { error } = await supabase
-        .from('partners')
-        .delete()
-        .eq('id', id);
+      const response = await fetch('/api/admin/partners', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to delete');
       fetchPartners();
     } catch (error: any) {
-      alert('Error deleting partner: ' + error.message);
+      alert('Error: ' + error.message);
     }
   };
 
@@ -431,7 +438,7 @@ export default function AdminDashboard() {
         if (!response.ok) throw new Error('Failed to add event');
       }
 
-      setEventForm({ title: '', description: '', department: 'aerospace', image_url: '', event_date: '' });
+      setEventForm({ title: '', category: '', date: '', time: '', venue: '', form_link: '', image_url: '' });
       setEditingEventId(null);
       fetchEvents();
       alert(editingEventId ? 'Event updated!' : 'Event added!');
@@ -467,6 +474,12 @@ export default function AdminDashboard() {
     setUploading(true);
 
     try {
+      const today = new Date().toISOString().split('T')[0];
+      const galleryData = {
+        ...galleryForm,
+        date: galleryForm.date || today,
+      };
+
       if (editingGalleryId) {
         const response = await fetch('/api/admin/gallery', {
           method: 'PUT',
@@ -474,7 +487,7 @@ export default function AdminDashboard() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ id: editingGalleryId, ...galleryForm }),
+          body: JSON.stringify({ id: editingGalleryId, ...galleryData }),
         });
 
         if (!response.ok) throw new Error('Failed to update item');
@@ -485,13 +498,14 @@ export default function AdminDashboard() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify(galleryForm),
+          body: JSON.stringify(galleryData),
         });
 
         if (!response.ok) throw new Error('Failed to add item');
       }
 
-      setGalleryForm({ title: '', description: '', department: 'aerospace', image_url: '' });
+      const today_date = new Date().toISOString().split('T')[0];
+      setGalleryForm({ title: '', description: '', type: 'news_photo', date: today_date, image_url: '' });
       setEditingGalleryId(null);
       fetchGalleryItems();
       alert(editingGalleryId ? 'Item updated!' : 'Item added!');
@@ -699,7 +713,6 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        {/* Tab Navigation */}
         <div className="flex gap-2 mb-8 border-b border-gray-200 overflow-x-auto">
           {(['partners', 'lecturers', 'events', 'gallery', 'executives', 'department-admins', 'admin-users'] as Tab[]).map((tab) => (
             <button
@@ -716,22 +729,21 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Partners Tab */}
         {activeTab === 'partners' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
               <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Add New Partner</h2>
               <form onSubmit={handleAddPartner} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Partner Name</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Partner Name (Max 50 chars)</label>
                   <input
                     type="text"
                     value={newPartnerName}
-                    onChange={(e) => setNewPartnerName(e.target.value)}
+                    onChange={(e) => setNewPartnerName(e.target.value.slice(0, 50))}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     placeholder="Enter partner name"
                     required
-                    disabled={partners.length >= 4}
                   />
                 </div>
                 <div>
@@ -743,12 +755,11 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     placeholder="https://example.com/logo.png"
                     required
-                    disabled={partners.length >= 4}
                   />
                 </div>
                 <button
                   type="submit"
-                  disabled={uploading || partners.length >= 4}
+                  disabled={uploading}
                   className="px-8 py-3 bg-[#E6731F] text-white rounded-lg font-semibold hover:bg-[#C45D16] disabled:opacity-50"
                 >
                   {uploading ? 'Adding...' : 'Add Partner'}
@@ -757,7 +768,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Partners ({partners.length}/4)</h2>
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Partners ({partners.length})</h2>
               {partners.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No partners</div>
               ) : (
@@ -765,7 +776,7 @@ export default function AdminDashboard() {
                   {partners.map((partner) => (
                     <div key={partner.id} className="border border-gray-200 rounded-lg p-4 flex flex-col items-center gap-4">
                       <img src={partner.logo_url} alt={partner.name} className="h-24 w-auto object-contain" />
-                      <h3 className="font-semibold text-[#212121]">{partner.name}</h3>
+                      <h3 className="font-semibold text-[#212121] text-center">{partner.name}</h3>
                       <button
                         onClick={() => handleDeletePartner(partner.id)}
                         className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -780,7 +791,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Lecturers Tab */}
         {activeTab === 'lecturers' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -902,7 +912,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Events Tab */}
         {activeTab === 'events' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -922,35 +931,58 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Description (Max 50 chars)</label>
-                  <textarea
-                    value={eventForm.description}
-                    onChange={(e) => setEventForm({ ...eventForm, description: e.target.value.slice(0, 50) })}
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Category (Max 50 chars)</label>
+                  <input
+                    type="text"
+                    value={eventForm.category}
+                    onChange={(e) => setEventForm({ ...eventForm, category: e.target.value.slice(0, 50) })}
                     maxLength={50}
+                    placeholder="e.g., Flagship, 2nd Edition, Annual Summit"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                    rows={4}
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Department</label>
-                  <select
-                    value={eventForm.department}
-                    onChange={(e) => setEventForm({ ...eventForm, department: e.target.value })}
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={eventForm.date}
+                    onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                  >
-                    {departments.map((dept) => (
-                      <option key={dept.slug} value={dept.slug}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Event Date</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Time (Max 50 chars)</label>
                   <input
-                    type="datetime-local"
-                    value={eventForm.event_date}
-                    onChange={(e) => setEventForm({ ...eventForm, event_date: e.target.value })}
+                    type="text"
+                    value={eventForm.time}
+                    onChange={(e) => setEventForm({ ...eventForm, time: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    placeholder="e.g., 09:00 AM"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Venue (Max 50 chars)</label>
+                  <input
+                    type="text"
+                    value={eventForm.venue}
+                    onChange={(e) => setEventForm({ ...eventForm, venue: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    placeholder="e.g., Main Auditorium"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Form Link (Optional)</label>
+                  <input
+                    type="url"
+                    value={eventForm.form_link}
+                    onChange={(e) => setEventForm({ ...eventForm, form_link: e.target.value })}
+                    placeholder="https://forms.google.com/..."
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                   />
                 </div>
@@ -974,7 +1006,7 @@ export default function AdminDashboard() {
                       type="button"
                       onClick={() => {
                         setEditingEventId(null);
-                        setEventForm({ title: '', description: '', department: 'aerospace', image_url: '', event_date: '' });
+                        setEventForm({ title: '', category: '', date: '', time: '', venue: '', form_link: '', image_url: '' });
                       }}
                       className="px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500"
                     >
@@ -996,13 +1028,14 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold text-[#212121]">{event.title}</h3>
-                          <p className="text-sm text-gray-600">{event.description}</p>
+                          <p className="text-sm text-gray-600">{event.category}</p>
+                          <p className="text-sm text-gray-600">{event.venue}</p>
                           <p className="text-sm text-gray-600 mt-2">
-                            {departments.find(d => d.slug === event.department)?.name}
+                            {new Date(event.date).toLocaleDateString()} at {event.time}
                           </p>
-                          {event.event_date && (
-                            <p className="text-sm text-gray-600">
-                              {new Date(event.event_date).toLocaleDateString()}
+                          {event.form_link && (
+                            <p className="text-sm text-blue-600 mt-2">
+                              <a href={event.form_link} target="_blank" rel="noopener noreferrer">Registration Form →</a>
                             </p>
                           )}
                         </div>
@@ -1012,10 +1045,12 @@ export default function AdminDashboard() {
                               setEditingEventId(event.id);
                               setEventForm({
                                 title: event.title,
-                                description: event.description,
-                                department: event.department,
+                                category: event.category,
+                                date: event.date,
+                                time: event.time,
+                                venue: event.venue,
+                                form_link: event.form_link || '',
                                 image_url: event.image_url,
-                                event_date: event.event_date,
                               });
                             }}
                             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -1038,7 +1073,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Gallery Tab */}
         {activeTab === 'gallery' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -1064,22 +1098,32 @@ export default function AdminDashboard() {
                     onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value.slice(0, 50) })}
                     maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                    rows={4}
+                    rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Department</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Type</label>
                   <select
-                    value={galleryForm.department}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, department: e.target.value })}
+                    value={galleryForm.type}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, type: e.target.value as 'news_photo' | 'event_photo' })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                   >
-                    {departments.map((dept) => (
-                      <option key={dept.slug} value={dept.slug}>
-                        {dept.name}
+                    {galleryTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
                       </option>
                     ))}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={galleryForm.date}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, date: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    required
+                  />
                 </div>
                 <ImageUploadComponent
                   onImageUrlChange={(url) => setGalleryForm({ ...galleryForm, image_url: url })}
@@ -1100,8 +1144,9 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       onClick={() => {
+                        const today = new Date().toISOString().split('T')[0];
                         setEditingGalleryId(null);
-                        setGalleryForm({ title: '', description: '', department: 'aerospace', image_url: '' });
+                        setGalleryForm({ title: '', description: '', type: 'news_photo', date: today, image_url: '' });
                       }}
                       className="px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500"
                     >
@@ -1124,8 +1169,8 @@ export default function AdminDashboard() {
                         <div className="flex-1">
                           <h3 className="font-semibold text-[#212121]">{item.title}</h3>
                           <p className="text-sm text-gray-600">{item.description}</p>
-                          <p className="text-sm text-gray-600 mt-2">
-                            {departments.find(d => d.slug === item.department)?.name}
+                          <p className="text-xs text-gray-500 mt-2">
+                            {item.type === 'news_photo' ? '📰 News Photo' : '📸 Event Photo'} • {new Date(item.date).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -1135,7 +1180,8 @@ export default function AdminDashboard() {
                               setGalleryForm({
                                 title: item.title,
                                 description: item.description,
-                                department: item.department,
+                                type: item.type,
+                                date: item.date,
                                 image_url: item.image_url,
                               });
                             }}
@@ -1159,7 +1205,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Executives Tab */}
         {activeTab === 'executives' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -1336,7 +1381,6 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Department Admins Tab */}
         {activeTab === 'department-admins' && (
           <>
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -1421,9 +1465,7 @@ export default function AdminDashboard() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold text-[#212121]">{admin.name}</h3>
-                          <p className="text-sm text-gray-600">
-                            {departments.find(d => d.slug === admin.department)?.name}
-                          </p>
+                          <p className="text-sm text-gray-600">{departments.find(d => d.slug === admin.department)?.name}</p>
                           <p className="text-sm text-gray-600">{admin.bio}</p>
                         </div>
                         <div className="flex gap-2">
@@ -1457,35 +1499,39 @@ export default function AdminDashboard() {
           </>
         )}
 
-        {/* Admin Users Tab */}
         {activeTab === 'admin-users' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold text-[#C45D16] mb-4">Admin Users Management</h2>
-              <p className="text-sm text-red-600 font-semibold">⚠️ Warning: Only remove admin accounts if you're certain the credentials have been compromised.</p>
-            </div>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+          <>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Admin Users</h2>
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <strong>Warning:</strong> If a password is leaked, delete unauthorized accounts and change the ADMIN_PASSWORD in .env.
+                </p>
+              </div>
               {adminUsers.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">No admin users</div>
               ) : (
-                adminUsers.map((user) => (
-                  <div key={user.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="font-semibold text-[#212121]">{user.email}</p>
-                      <p className="text-xs text-gray-600">Created: {new Date(user.created_at).toLocaleDateString()}</p>
+                <div className="space-y-4">
+                  {adminUsers.map((user) => (
+                    <div key={user.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-[#212121]">{user.email}</h3>
+                          <p className="text-xs text-gray-500 mt-1">Created: {new Date(user.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteAdminUser(user.email)}
+                          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteAdminUser(user.email)}
-                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
