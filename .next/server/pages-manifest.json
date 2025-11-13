@@ -4,6 +4,6 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/about": "pages/about.js",
-  "/departments/aerospace": "pages/departments/aerospace.js",
-  "/api/lecturers": "pages/api/lecturers.js"
+  "/api/lecturers": "pages/api/lecturers.js",
+  "/departments/aerospace": "pages/departments/aerospace.js"
 }
