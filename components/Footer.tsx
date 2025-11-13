@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-[#793D14] text-white mt-12">
       <div className="max-w-7xl mx-auto px-6 md:px-24 py-10">
-        <div className="flex flex-col md:flex-row gap-0 justify-between">
+        <div className="flex flex-col md:flex-row gap-8 justify-between">
           <div className="md:w-1/3">
             <div className="flex items-center gap-3 mb-4">
               <img src="https://api.builder.io/api/v1/image/assets/TEMP/f63c9f0843d1fa4c98224886a4f06161bc5ab51f?width=97" alt="NUESA LASU" className="w-12 h-12" />
