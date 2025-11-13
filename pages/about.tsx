@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import StayInTheLoop from "../components/StayInTheLoop";
+import BackgroundDecor from "../components/BackgroundDecor";
 
 export default function About() {
 
@@ -61,8 +62,11 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
+    <div className="min-h-screen bg-white relative">
+      <BackgroundDecor />
+
+      <div className="relative z-10">
+        <Header />
 
       {/* HERO */}
       <section className="w-full bg-white">
@@ -331,9 +335,14 @@ export default function About() {
       </section>
 
       {/* STAY IN THE LOOP */}
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <StayInTheLoop />
 
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <Footer />
+      </div>
     </div>
   );
 }

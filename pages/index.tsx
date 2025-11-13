@@ -42,8 +42,11 @@ export default function Home() {
 
 
   return (
-    <div className="min-h-screen bg-white font-roboto">
-      <Header />
+    <div className="min-h-screen bg-white font-roboto relative">
+      <BackgroundDecor />
+
+      <div className="relative z-10">
+        <Header />
 
       {/* HERO */}
       <section className="w-full">
@@ -234,9 +237,14 @@ export default function Home() {
       </section>
 
       {/* STAY IN THE LOOP */}
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <StayInTheLoop />
 
+      <div className="w-full bg-[#E6731F] h-2"></div>
+
       <Footer />
+      </div>
     </div>
   );
 }
