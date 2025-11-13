@@ -3,5 +3,12 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/api/executives": "pages/api/executives.js"
+  "/about": "pages/about.js",
+  "/api/department-admins": "pages/api/department-admins.js",
+  "/api/executives": "pages/api/executives.js",
+  "/events": "pages/events.js",
+  "/partnerships": "pages/partnerships.js",
+  "/departments/mechanical": "pages/departments/mechanical.js",
+  "/departments/aerospace": "pages/departments/aerospace.js",
+  "/api/lecturers": "pages/api/lecturers.js"
 }
