@@ -66,7 +66,7 @@ export default function Header() {
           </Link>
           <div className="relative" onMouseEnter={() => setDeptDropdown(true)} onMouseLeave={() => setDeptDropdown(false)}>
             <button className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded flex items-center gap-1">
-              Aerospace Engineering
+              {currentDeptName}
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
