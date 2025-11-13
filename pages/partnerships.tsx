@@ -228,11 +228,10 @@ export default function Partnerships() {
         </div>
       </section>
 
-      {/* Orange Spacing Before Footer */}
-      <div className="w-full bg-[rgba(196,93,22,0.2)]" style={{ height: '1px' }}></div>
-
       {/* STAY IN THE LOOP */}
       <StayInTheLoop />
+
+      <div className="w-full bg-[#E6731F] h-20"></div>
 
 
       <Footer />
