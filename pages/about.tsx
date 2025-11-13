@@ -338,7 +338,7 @@ export default function About() {
 
       <StayInTheLoop />
 
-      <div className="w-full bg-[#E6731F] h-28"></div>
+      <div className="w-full bg-[#E6731F] h-20"></div>
 
       <Footer />
       </div>
