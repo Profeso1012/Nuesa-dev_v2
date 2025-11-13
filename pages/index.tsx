@@ -19,36 +19,59 @@ interface Executive {
   created_at: string;
 }
 
+interface Event {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  time: string;
+  venue: string;
+  form_link: string | null;
+  image_url: string;
+  created_at: string;
+}
+
 export default function Home() {
   const [leadersIndex, setLeadersIndex] = useState(0);
   const [leaders, setLeaders] = useState<Executive[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchExecutives();
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      await Promise.all([fetchExecutives(), fetchEvents()]);
+      
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching data:', err);
+      setError(err.message || 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchExecutives = async () => {
     try {
-      setLoading(true);
       const cacheKey = 'executives_current';
       
-      // Try to get from cache first
       const cached = getCachedData<Executive[]>(cacheKey);
       if (cached && cached.length > 0) {
         setLeaders(cached);
-        setLoading(false);
         return;
       }
 
-      // Fetch from API if not cached
       const response = await fetch('/api/executives?type=current');
       if (!response.ok) throw new Error('Failed to fetch executives');
       
       const data: Executive[] = await response.json();
       
-      // Pad array to 9 items if less than 9
       while (data.length < 9) {
         const postNum = data.length + 1;
         data.push({
@@ -65,14 +88,10 @@ export default function Home() {
         });
       }
 
-      // Cache the data
       setCachedData(cacheKey, data);
       setLeaders(data);
-      setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching executives:', err);
-      setError(err.message || 'Failed to load executives');
-      // Fallback to dummy data
       const dummyData: Executive[] = Array.from({ length: 9 }, (_, i) => ({
         id: `placeholder-${i}`,
         name: `Post ${i + 1}`,
@@ -86,12 +105,33 @@ export default function Home() {
         created_at: new Date().toISOString(),
       }));
       setLeaders(dummyData);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Auto-scroll carousels
+  const fetchEvents = async () => {
+    try {
+      const cacheKey = 'events_upcoming_3';
+      
+      const cached = getCachedData<Event[]>(cacheKey);
+      if (cached && cached.length > 0) {
+        setEvents(cached);
+        return;
+      }
+
+      const response = await fetch('/api/events?upcoming=true');
+      if (!response.ok) throw new Error('Failed to fetch events');
+      
+      const data: Event[] = await response.json();
+      const latestThree = data.slice(0, 3);
+
+      setCachedData(cacheKey, latestThree);
+      setEvents(latestThree);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setEvents([]);
+    }
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       setLeadersIndex((prev) => (prev + 1) % 3);
@@ -104,7 +144,6 @@ export default function Home() {
     <div className="min-h-screen bg-white font-roboto">
       <Header />
 
-      {/* HERO */}
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-6 md:px-24 flex flex-col lg:flex-row items-center gap-8">
           <div className="lg:w-1/2 w-full py-12 lg:py-24">
@@ -136,10 +175,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ABOUT US */}
       <AboutUsSection />
 
-      {/* MEET OUR LEADERS - CAROUSEL */}
       <section className="w-full py-16">
         <div className="max-w-7xl mx-auto px-6 md:px-24">
           <h2 className="text-3xl font-medium text-center mb-12">
@@ -213,41 +250,66 @@ export default function Home() {
         </div>
       </section>
 
-      {/* UPCOMING EVENTS */}
       <section className="max-w-7xl mx-auto px-6 md:px-24 py-16">
         <h3 className="text-center text-2xl md:text-3xl font-semibold text-[#212121]">
           Upcoming <span className="text-[#E6731F]">Events</span>
         </h3>
 
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <article key={i} className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="relative">
-                <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/a5787550b8f710ce6dd4c1296066b31dca55388f?width=996"
-                  alt="Event"
-                  className="w-full h-56 object-cover"
-                />
-              </div>
+        {events.length === 0 ? (
+          <div className="mt-10 text-center py-12 text-gray-600">
+            <p>No upcoming events at this time.</p>
+          </div>
+        ) : (
+          <>
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {events.map((event) => (
+                <article key={event.id} className="bg-white rounded-xl shadow-md overflow-hidden">
+                  <div className="relative">
+                    <img
+                      src={event.image_url}
+                      alt={event.title}
+                      className="w-full h-56 object-cover"
+                    />
+                  </div>
 
-              <div className="p-5">
-                <h4 className="text-[#5B933C] font-medium">E-library Launching</h4>
-                <p className="text-[#212121] font-semibold">Flagship Event</p>
-                <p className="mt-3 text-sm text-[#4B5563]">Date: 6th of November, 2025<br />Time: 10:00am<br />Venue: Faculty of Engineering Lecture Theatre</p>
-                <div className="mt-4">
-                  <button className="text-[#E6731F] border border-[#E6731F] px-3 py-2 rounded text-sm font-semibold">Register Now</button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                  <div className="p-5">
+                    <h4 className="text-[#5B933C] font-medium">{event.title}</h4>
+                    <p className="text-[#212121] font-semibold">{event.category}</p>
+                    <p className="mt-3 text-sm text-[#4B5563]">
+                      Date: {new Date(event.date).toLocaleDateString()}<br />
+                      Time: {event.time}<br />
+                      Venue: {event.venue}
+                    </p>
+                    <div className="mt-4">
+                      {event.form_link ? (
+                        <a
+                          href={event.form_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-[#E6731F] border border-[#E6731F] px-3 py-2 rounded text-sm font-semibold hover:bg-[#E6731F] hover:text-white transition"
+                        >
+                          Register Now
+                        </a>
+                      ) : (
+                        <button className="text-[#999] border border-[#999] px-3 py-2 rounded text-sm font-semibold cursor-not-allowed">
+                          Registration Closed
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-        <div className="mt-10 flex justify-center">
-          <button className="bg-[#5B933C] text-white px-6 py-3 rounded shadow-md">View All Events</button>
-        </div>
+            <div className="mt-10 flex justify-center">
+              <Link href="/events" className="bg-[#5B933C] text-white px-6 py-3 rounded shadow-md hover:bg-[#4a7a31] transition">
+                View All Events
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
-      {/* STAY IN THE LOOP */}
       <StayInTheLoop />
 
       <div className="w-full bg-[#E6731F] h-20"></div>   
