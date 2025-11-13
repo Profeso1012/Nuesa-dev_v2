@@ -8,7 +8,7 @@ export default function Events() {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [activeThumbIndex, setActiveThumbIndex] = useState(0);
 
-  const events = [
+  const upcomingEvents = [
     {
       title: 'E-library Launching',
       type: 'Flagship Event',
@@ -32,6 +32,41 @@ export default function Events() {
       time: '10:00am',
       venue: 'Faculty of Engineering Lecture Theatre',
       image: 'https://api.builder.io/api/v1/image/assets/TEMP/a8b5d182647c3ad408199ea683f72ae0b251720a?width=996',
+    },
+  ];
+
+  const pastEvents = [
+    {
+      title: 'E-library Launching',
+      type: 'Flagship Event',
+      date: '6th of November, 2025',
+      time: '10:00am',
+      venue: 'Faculty of Engineering Lecture Theatre',
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a4e63687844ff3a58b345dff4b24a49b15f5ee6?width=996',
+    },
+    {
+      title: 'E-library Launching',
+      type: 'Flagship Event',
+      date: '6th of November, 2025',
+      time: '10:00am',
+      venue: 'Faculty of Engineering Lecture Theatre',
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a4e63687844ff3a58b345dff4b24a49b15f5ee6?width=996',
+    },
+    {
+      title: 'E-library Launching',
+      type: 'Flagship Event',
+      date: '6th of November, 2025',
+      time: '10:00am',
+      venue: 'Faculty of Engineering Lecture Theatre',
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/3e3b28d12e6cc51e62a72bf45044e8d83c9d5a8d?width=996',
+    },
+    {
+      title: 'E-library Launching',
+      type: 'Flagship Event',
+      date: '6th of November, 2025',
+      time: '10:00am',
+      venue: 'Faculty of Engineering Lecture Theatre',
+      image: 'https://api.builder.io/api/v1/image/assets/TEMP/1d8a9fc895395d8f2e474e1f109994777164925f?width=996',
     },
   ];
 
@@ -102,6 +137,8 @@ export default function Events() {
   const mainImage = allGalleryImages[activeThumbIndex];
   const thumbnails = allGalleryImages.filter((_, idx) => idx !== activeThumbIndex);
 
+  const events = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -157,7 +194,9 @@ export default function Events() {
                 </div>
                 <div className="p-5 space-y-4">
                   <div className="space-y-2">
-                    <h3 className="text-xl font-medium text-[#5B933C]">{event.title}</h3>
+                    <h3 className={`text-xl font-medium ${activeTab === 'past' ? 'text-[rgba(196,93,22,0.4)]' : 'text-[#5B933C]'}`}>
+                      {event.title}
+                    </h3>
                     <p className="text-lg text-[#212121]">{event.type}</p>
                   </div>
                   <div className="text-sm font-medium text-[#212121] space-y-1">
@@ -165,7 +204,13 @@ export default function Events() {
                     <p>Time: {event.time}</p>
                     <p>Venue: {event.venue}</p>
                   </div>
-                  <button className="border border-[#E6731F] text-[#E6731F] px-6 py-3 rounded font-semibold text-sm hover:bg-[#E6731F] hover:text-white transition-colors">
+                  <button 
+                    className={`border rounded font-semibold text-sm px-6 py-3 transition-colors ${
+                      activeTab === 'past'
+                        ? 'border-[rgba(196,93,22,0.4)] text-[rgba(196,93,22,0.4)]'
+                        : 'border-[#E6731F] text-[#E6731F] hover:bg-[#E6731F] hover:text-white'
+                    }`}
+                  >
                     Register Now
                   </button>
                 </div>
@@ -173,12 +218,23 @@ export default function Events() {
             ))}
           </div>
 
-          {/* PAGINATION DOTS */}
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
-          </div>
+          {/* VIEW ALL PAST EVENTS BUTTON (only show when on past events tab) */}
+          {activeTab === 'past' && (
+            <div className="flex justify-center mt-10">
+              <button className="px-8 py-3.5 bg-[#E6731F] text-white rounded text-sm font-semibold shadow-md hover:bg-[#C45D16] transition-colors">
+                View All Past Events
+              </button>
+            </div>
+          )}
+
+          {/* PAGINATION DOTS (only show when on upcoming tab) */}
+          {activeTab === 'upcoming' && (
+            <div className="flex items-center justify-center gap-3">
+              <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -293,8 +349,14 @@ export default function Events() {
         </div>
       </section>
 
+      {/* Orange Spacing Before Stay in the Loop */}
+      <div className="w-full" style={{ background: 'rgba(196, 93, 22, 0.20)', height: '2px' }}></div>
+
       {/* STAY IN THE LOOP */}
       <StayInTheLoop />
+
+      {/* Orange Spacing Before Footer */}
+      <div className="w-full" style={{ background: 'rgba(196, 93, 22, 0.20)', height: '2px' }}></div>
 
       <Footer />
     </div>

@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [deptDropdown, setDeptDropdown] = useState(false);
+  const router = useRouter();
 
   const departments = [
     { name: 'Mechanical Engineering', slug: 'mechanical' },
@@ -13,6 +15,10 @@ export default function Header() {
     { name: 'Civil Engineering', slug: 'civil' },
     { name: 'Industrial Engineering', slug: 'industrial' },
   ];
+
+  const isActive = (path: string) => {
+    return router.pathname === path;
+  };
 
   return (
     <header className="w-full bg-white border-b border-[#9BBBE5] shadow-sm">
@@ -30,9 +36,24 @@ export default function Header() {
         </div>
 
         <nav className="hidden md:flex items-center gap-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
-          <Link href="/" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">Home</Link>
-          <Link href="/about" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">About</Link>
-          <Link href="/events" className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded">Events</Link>
+          <Link 
+            href="/" 
+            className={`px-2.5 py-1.5 text-sm font-medium rounded ${isActive('/') ? 'bg-[#C45D16] text-white' : 'hover:bg-gray-50'}`}
+          >
+            Home
+          </Link>
+          <Link 
+            href="/about" 
+            className={`px-2.5 py-1.5 text-sm font-medium rounded ${isActive('/about') ? 'bg-[#C45D16] text-white' : 'hover:bg-gray-50'}`}
+          >
+            About
+          </Link>
+          <Link 
+            href="/events" 
+            className={`px-2.5 py-1.5 text-sm font-medium rounded ${isActive('/events') ? 'bg-[#C45D16] text-white' : 'hover:bg-gray-50'}`}
+          >
+            Events
+          </Link>
           <div className="relative" onMouseEnter={() => setDeptDropdown(true)} onMouseLeave={() => setDeptDropdown(false)}>
             <button className="px-2.5 py-1.5 text-sm font-medium hover:bg-gray-50 rounded flex items-center gap-1">
               Aerospace Engineering
@@ -54,7 +75,10 @@ export default function Header() {
               </div>
             )}
           </div>
-          <Link href="/partnerships" className="px-2.5 py-1.5 text-sm font-medium text-white bg-[#C45D16] rounded">
+          <Link 
+            href="/partnerships" 
+            className={`px-2.5 py-1.5 text-sm font-medium rounded ${isActive('/partnerships') ? 'bg-[#C45D16] text-white' : 'hover:bg-gray-50'}`}
+          >
             Partnerships
           </Link>
         </nav>
