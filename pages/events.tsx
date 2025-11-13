@@ -2,7 +2,29 @@ import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import StayInTheLoop from '../components/StayInTheLoop';
-import BackgroundDecor from '../components/BackgroundDecor';
+import { getCachedData, setCachedData } from '../lib/cacheUtils';
+
+interface Event {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  time: string;
+  venue: string;
+  form_link: string | null;
+  image_url: string;
+  created_at: string;
+}
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  type: 'news_photo' | 'event_photo';
+  date: string;
+  image_url: string;
+  created_at: string;
+}
 
 export default function Events() {
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
@@ -10,145 +32,134 @@ export default function Events() {
   const [activeThumbIndex, setActiveThumbIndex] = useState(0);
   const [viewAllPastEvents, setViewAllPastEvents] = useState(false);
 
-  const upcomingEvents = [
-    {
-      title: 'E-library Launching',
-      type: 'Flagship Event',
-      date: '6th of November, 2025',
-      time: '10:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/a5787550b8f710ce6dd4c1296066b31dca55388f?width=996',
-    },
-    {
-      title: 'E-library Launching',
-      type: 'Flagship Event',
-      date: '6th of November, 2025',
-      time: '10:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/a5787550b8f710ce6dd4c1296066b31dca55388f?width=996',
-    },
-    {
-      title: 'E-library Launching',
-      type: 'Flagship Event',
-      date: '6th of November, 2025',
-      time: '10:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/a8b5d182647c3ad408199ea683f72ae0b251720a?width=996',
-    },
-  ];
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [pastEvents, setPastEvents] = useState<Event[]>([]);
+  const [eventPhotoGallery, setEventPhotoGallery] = useState<GalleryItem[]>([]);
+  const [newsPhotoGallery, setNewsPhotoGallery] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const pastEvents = [
-    {
-      title: 'E-library Launching',
-      type: 'Flagship Event',
-      date: '6th of November, 2024',
-      time: '10:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a4e63687844ff3a58b345dff4b24a49b15f5ee6?width=996',
-    },
-    {
-      title: 'Tech Expo 2024',
-      type: 'Flagship Event',
-      date: '15th of October, 2024',
-      time: '2:00pm',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a4e63687844ff3a58b345dff4b24a49b15f5ee6?width=996',
-    },
-    {
-      title: 'Engineering Week',
-      type: 'Flagship Event',
-      date: '20th of September, 2024',
-      time: '9:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/3e3b28d12e6cc51e62a72bf45044e8d83c9d5a8d?width=996',
-    },
-    {
-      title: 'Career Fair 2024',
-      type: 'Flagship Event',
-      date: '5th of August, 2024',
-      time: '11:00am',
-      venue: 'Faculty of Engineering Lecture Theatre',
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/1d8a9fc895395d8f2e474e1f109994777164925f?width=996',
-    },
-  ];
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
-  const allGalleryImages = [
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/31c91664892725e38b775899aa15b6d5119f844a?width=3072',
-      title: 'NUESA LASU Tech Expo 1.0',
-      date: 'July 2025.',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/0e18bad089f58b090377197d1552ec3900efc20f?width=586',
-      title: 'NUESA LASU Tech Expo 1.0',
-      date: 'July 2025.',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-      title: 'NUESA LASU Tech Expo 1.0',
-      date: 'July 2025.',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-      title: 'NUESA LASU Tech Expo 1.0',
-      date: 'July 2025.',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/67c49ea26d23b67474d61612e588d8c966be7054?width=586',
-      title: 'NUESA LASU Tech Expo 1.0',
-      date: 'July 2025.',
-    },
-  ];
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([
+        fetchUpcomingEvents(),
+        fetchPastEvents(),
+        fetchEventPhotos(),
+        fetchNewsPhotos(),
+      ]);
+    } catch (error) {
+      console.error('Error fetching events and gallery:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const allPhotoNewsImages = [
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/6a1b12b8c5312c9139a24c0e6b7a7f56a3bcd987?width=3072',
-      title: 'Engineering Students Excel at National Innovation Summit',
-      date: 'October 2025',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/f214a8c641e6a952d3b0cba5e1df0a847f3b3e8d?width=586',
-      title: 'NUESA Hosts Career Tech Talk Series',
-      date: 'September 2025',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/54b61a2a88e8b0a4b67b9b0b4a8453d72e65e019?width=586',
-      title: 'Students Participate in AI & Robotics Challenge',
-      date: 'August 2025',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/5a27c0f4983a4c293dcb8c414a5275c65b7895f9?width=586',
-      title: 'NUESA LASU Team Visits Dangote Refinery',
-      date: 'July 2025',
-    },
-    {
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/47a64bcb731b42bba8d42d1a3cc4c28cf65af29a?width=586',
-      title: 'Engineering Week 2025 Highlights and Awards',
-      date: 'June 2025',
-    },
-  ];
+  const fetchUpcomingEvents = async () => {
+    try {
+      const cacheKey = 'events_upcoming_all';
+      const cached = getCachedData<Event[]>(cacheKey);
+      if (cached && cached.length > 0) {
+        setUpcomingEvents(cached);
+        return;
+      }
+
+      const response = await fetch('/api/events?upcoming=true');
+      if (!response.ok) throw new Error('Failed to fetch upcoming events');
+      const data = await response.json();
+      setCachedData(cacheKey, data);
+      setUpcomingEvents(data);
+    } catch (error) {
+      console.error('Error fetching upcoming events:', error);
+      setUpcomingEvents([]);
+    }
+  };
+
+  const fetchPastEvents = async () => {
+    try {
+      const cacheKey = 'events_past_all';
+      const cached = getCachedData<Event[]>(cacheKey);
+      if (cached && cached.length > 0) {
+        setPastEvents(cached);
+        return;
+      }
+
+      const response = await fetch('/api/events?past=true');
+      if (!response.ok) throw new Error('Failed to fetch past events');
+      const data = await response.json();
+      setCachedData(cacheKey, data);
+      setPastEvents(data);
+    } catch (error) {
+      console.error('Error fetching past events:', error);
+      setPastEvents([]);
+    }
+  };
+
+  const fetchEventPhotos = async () => {
+    try {
+      const cacheKey = 'gallery_event_photos';
+      const cached = getCachedData<GalleryItem[]>(cacheKey);
+      if (cached && cached.length > 0) {
+        setEventPhotoGallery(cached);
+        return;
+      }
+
+      const response = await fetch('/api/gallery?type=event_photo');
+      if (!response.ok) throw new Error('Failed to fetch event photos');
+      const data = await response.json();
+      setCachedData(cacheKey, data);
+      setEventPhotoGallery(data);
+    } catch (error) {
+      console.error('Error fetching event photos:', error);
+      setEventPhotoGallery([]);
+    }
+  };
+
+  const fetchNewsPhotos = async () => {
+    try {
+      const cacheKey = 'gallery_news_photos';
+      const cached = getCachedData<GalleryItem[]>(cacheKey);
+      if (cached && cached.length > 0) {
+        setNewsPhotoGallery(cached);
+        return;
+      }
+
+      const response = await fetch('/api/gallery?type=news_photo');
+      if (!response.ok) throw new Error('Failed to fetch news photos');
+      const data = await response.json();
+      setCachedData(cacheKey, data);
+      setNewsPhotoGallery(data);
+    } catch (error) {
+      console.error('Error fetching news photos:', error);
+      setNewsPhotoGallery([]);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveThumbIndex((prev) => (prev + 1) % allGalleryImages.length);
+      const galleryToUse = newsPhotoGallery.length > 0 ? newsPhotoGallery : [];
+      setActiveThumbIndex((prev) => (prev + 1) % Math.max(galleryToUse.length, 1));
     }, 5000);
     return () => clearInterval(interval);
-  }, [allGalleryImages.length]);
-
-  const mainImage = allGalleryImages[activeThumbIndex];
-  const thumbnails = allGalleryImages.filter((_, idx) => idx !== activeThumbIndex);
+  }, [newsPhotoGallery.length]);
 
   const events = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   const createPlaceholderEvent = () => ({
+    id: `placeholder-${Math.random()}`,
     title: '',
-    type: '',
+    category: '',
     date: '',
     time: '',
     venue: '',
-    image: 'https://api.builder.io/api/v1/image/assets/TEMP/placeholder',
+    form_link: null,
+    image_url: 'https://api.builder.io/api/v1/image/assets/TEMP/placeholder',
+    created_at: new Date().toISOString(),
     isPlaceholder: true,
-  });
+  } as any);
 
   const displayedPastEvents = () => {
     if (viewAllPastEvents) {
@@ -186,7 +197,7 @@ export default function Events() {
       <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="relative h-64">
           <img
-            src={event.image}
+            src={event.image_url}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -196,31 +207,53 @@ export default function Events() {
             <h3 className={`text-xl font-medium ${isPast ? 'text-[rgba(196,93,22,0.4)]' : 'text-[#5B933C]'}`}>
               {event.title}
             </h3>
-            <p className="text-lg text-[#212121]">{event.type}</p>
+            <p className="text-lg text-[#212121]">{event.category}</p>
           </div>
           <div className="text-sm font-medium text-[#212121] space-y-1">
-            <p>Date: {event.date}</p>
+            <p>Date: {new Date(event.date).toLocaleDateString()}</p>
             <p>Time: {event.time}</p>
             <p>Venue: {event.venue}</p>
           </div>
-          <button 
-            className={`border rounded font-semibold text-sm px-6 py-3 transition-colors ${
-              isPast
-                ? 'border-[rgba(196,93,22,0.4)] text-[rgba(196,93,22,0.4)] cursor-not-allowed'
-                : 'border-[#E6731F] text-[#E6731F] hover:bg-[#E6731F] hover:text-white'
-            }`}
-            disabled={isPast}
-          >
-            Register Now
-          </button>
+          {!isPast && event.form_link ? (
+            <a
+              href={event.form_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block border border-[#E6731F] text-[#E6731F] hover:bg-[#E6731F] hover:text-white rounded font-semibold text-sm px-6 py-3 transition-colors"
+            >
+              Register Now
+            </a>
+          ) : (
+            <button 
+              className={`border rounded font-semibold text-sm px-6 py-3 transition-colors ${
+                isPast
+                  ? 'border-[rgba(196,93,22,0.4)] text-[rgba(196,93,22,0.4)] cursor-not-allowed'
+                  : 'border-[#E6731F] text-[#E6731F]'
+              }`}
+              disabled={isPast}
+            >
+              Register Now
+            </button>
+          )}
         </div>
       </article>
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="flex items-center justify-center py-32">
+          <p className="text-gray-600">Loading events and gallery...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white relative">
-      
       <div className="relative z-10">
         <Header />
 
@@ -247,7 +280,7 @@ export default function Events() {
                           : 'bg-transparent text-[#5B933C]'
                       }`}
                     >
-                      Upcoming (5)
+                      Upcoming ({upcomingEvents.length})
                     </button>
                     <button
                       onClick={() => setActiveTab('past')}
@@ -257,30 +290,30 @@ export default function Events() {
                           : 'bg-transparent text-[#5B933C]'
                       }`}
                     >
-                      Past Events
+                      Past Events ({pastEvents.length})
                     </button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
                   {activeTab === 'upcoming' ? (
-                    events.map((event, idx) => (
-                      <EventCard key={idx} event={event} isPast={false} />
-                    ))
+                    upcomingEvents.length > 0 ? (
+                      upcomingEvents.map((event) => (
+                        <EventCard key={event.id} event={event} isPast={false} />
+                      ))
+                    ) : (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        <p>No upcoming events at this time.</p>
+                      </div>
+                    )
                   ) : (
-                    displayedPastEvents().map((event, idx) => (
-                      <EventCard key={idx} event={event} isPast={true} />
+                    displayedPastEvents().map((event) => (
+                      <EventCard key={event.id} event={event} isPast={true} />
                     ))
                   )}
                 </div>
 
-                {activeTab === 'past' && pastEvents.length === 0 && (
-                  <div className="text-center my-10">
-                    <p className="text-2xl font-bold text-[#212121]">No past events</p>
-                  </div>
-                )}
-
-                {activeTab === 'past' && pastEvents.length > 0 && (
+                {activeTab === 'past' && pastEvents.length > 3 && (
                   <div className="flex justify-center mt-10">
                     <button 
                       onClick={() => setViewAllPastEvents(true)}
@@ -291,7 +324,7 @@ export default function Events() {
                   </div>
                 )}
 
-                {activeTab === 'upcoming' && (
+                {activeTab === 'upcoming' && upcomingEvents.length > 0 && (
                   <div className="flex items-center justify-center gap-3">
                     <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
@@ -301,7 +334,7 @@ export default function Events() {
               </>
             )}
 
-            {viewAllPastEvents && (
+            {viewAllPastEvents && pastEvents.length > 0 && (
               <>
                 <div className="flex items-center gap-4 mb-8">
                   <button
@@ -320,8 +353,8 @@ export default function Events() {
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-                  {pastEvents.map((event, idx) => (
-                    <EventCard key={idx} event={event} isPast={true} />
+                  {pastEvents.map((event) => (
+                    <EventCard key={event.id} event={event} isPast={true} />
                   ))}
                 </div>
               </>
@@ -329,111 +362,96 @@ export default function Events() {
           </div>
         </section>
 
-        {!viewAllPastEvents && (
-          <>
-            <section className="w-full py-16 md:py-20 bg-gray-50">
-              <div className="max-w-7xl mx-auto px-6 md:px-24">
-                <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
-                  Event <span className="text-[#C45D16]">Photo Gallery</span>
-                </h2>
+        {!viewAllPastEvents && eventPhotoGallery.length > 0 && (
+          <section className="w-full py-16 md:py-20 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-6 md:px-24">
+              <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
+                Event <span className="text-[#C45D16]">Photo Gallery</span>
+              </h2>
 
-                <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
-                  <img
-                    src={mainImage.image}
-                    alt="Event Gallery"
-                    className="w-full h-auto max-h-[630px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
-                    <h3 className="text-white text-2xl md:text-3xl font-medium">
-                      {mainImage.title}
-                    </h3>
-                    <p className="text-white text-xl md:text-2xl font-medium">
-                      {mainImage.date}
-                    </p>
-                  </div>
+              <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
+                <img
+                  src={eventPhotoGallery[activeThumbIndex]?.image_url}
+                  alt="Event Gallery"
+                  className="w-full h-auto max-h-[630px] object-cover"
+                />
+                <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
+                  <h3 className="text-white text-2xl md:text-3xl font-medium">
+                    {eventPhotoGallery[activeThumbIndex]?.title}
+                  </h3>
+                  <p className="text-white text-xl md:text-2xl font-medium">
+                    {new Date(eventPhotoGallery[activeThumbIndex]?.date).toLocaleDateString()}
+                  </p>
                 </div>
+              </div>
 
+              {eventPhotoGallery.length > 1 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-10">
-                  {thumbnails.map((thumb, idx) => (
+                  {eventPhotoGallery.map((item, idx) => (
                     <div
-                      key={idx}
-                      onClick={() => {
-                        const originalIndex = allGalleryImages.findIndex(img => img.image === thumb.image);
-                        setActiveThumbIndex(originalIndex);
-                      }}
+                      key={item.id}
+                      onClick={() => setActiveThumbIndex(idx)}
                       className={`relative overflow-hidden cursor-pointer transition-all ${
-                        idx === 0 ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
+                        idx === activeThumbIndex ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
                       }`}
                     >
                       <img
-                        src={thumb.image}
-                        alt={`Gallery thumbnail ${idx + 1}`}
+                        src={item.image_url}
+                        alt={item.title}
                         className="w-full h-56 object-cover"
                       />
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+          </section>
+        )}
 
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
+        {!viewAllPastEvents && newsPhotoGallery.length > 0 && (
+          <section className="w-full py-16 md:py-20 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-6 md:px-24">
+              <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
+                Photo <span className="text-[#C45D16]">News</span>
+              </h2>
+
+              <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
+                <img
+                  src={newsPhotoGallery[activeThumbIndex]?.image_url}
+                  alt="Photo News"
+                  className="w-full h-auto max-h-[630px] object-cover"
+                />
+                <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
+                  <h3 className="text-white text-2xl md:text-3xl font-medium">
+                    {newsPhotoGallery[activeThumbIndex]?.title}
+                  </h3>
+                  <p className="text-white text-xl md:text-2xl font-medium">
+                    {new Date(newsPhotoGallery[activeThumbIndex]?.date).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
-            </section>
 
-            <section className="w-full py-16 md:py-20 bg-gray-50">
-              <div className="max-w-7xl mx-auto px-6 md:px-24">
-                <h2 className="text-3xl md:text-4xl font-medium mb-10 text-center">
-                  Photo <span className="text-[#C45D16]">News</span>
-                </h2>
-
-                <div className="relative rounded-2xl shadow-xl overflow-hidden mb-10">
-                  <img
-                    src={mainImage.image}
-                    alt="Photo News"
-                    className="w-full h-auto max-h-[630px] object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 bg-[#C93601] rounded-tr-2xl p-5 space-y-2">
-                    <h3 className="text-white text-2xl md:text-3xl font-medium">
-                      {mainImage.title}
-                    </h3>
-                    <p className="text-white text-xl md:text-2xl font-medium">
-                      {mainImage.date}
-                    </p>
-                  </div>
-                </div>
-
+              {newsPhotoGallery.length > 1 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 mb-10">
-                  {thumbnails.map((thumb, idx) => (
+                  {newsPhotoGallery.map((item, idx) => (
                     <div
-                      key={idx}
-                      onClick={() => {
-                        const originalIndex = allPhotoNewsImages.findIndex(
-                          img => img.image === thumb.image
-                        );
-                        setActiveThumbIndex(originalIndex);
-                      }}
-                      className={`relative overflow-hidden cursor-pointer transition-all ${idx === 0 ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
-                        }`}
+                      key={item.id}
+                      onClick={() => setActiveThumbIndex(idx)}
+                      className={`relative overflow-hidden cursor-pointer transition-all ${
+                        idx === activeThumbIndex ? 'border-[3px] border-[#212121]' : 'border border-[#C45D16]'
+                      }`}
                     >
                       <img
-                        src={thumb.image}
-                        alt={`Photo news thumbnail ${idx + 1}`}
+                        src={item.image_url}
+                        alt={item.title}
                         className="w-full h-56 object-cover"
                       />
                     </div>
                   ))}
                 </div>
-
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-12 h-3 rounded-full bg-[#E6731F]"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#C45D16] opacity-40"></div>
-                </div>
-              </div>
-            </section>
-          </>
+              )}
+            </div>
+          </section>
         )}
 
         <StayInTheLoop />
