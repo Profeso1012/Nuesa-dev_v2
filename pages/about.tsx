@@ -88,15 +88,17 @@ export default function About() {
     }
   };
 
-  // Auto-scroll carousels
   useEffect(() => {
+    const adminCardsCount = Math.ceil(departmentAdmins.length / 3) || 1;
+    const pastLeadersCount = Math.ceil(pastExecutives.length / 3) || 1;
+
     const interval = setInterval(() => {
-      setAdminsIndex((prev) => (prev + 1) % 3);
-      setPastLeadersIndex((prev) => (prev + 1) % 3);
+      setAdminsIndex((prev) => (prev + 1) % Math.max(adminCardsCount, 1));
+      setPastLeadersIndex((prev) => (prev + 1) % Math.max(pastLeadersCount, 1));
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [departmentAdmins.length, pastExecutives.length]);
 
   // Fallback data for display
   const displayCurrentExecutives = currentExecutives.slice(0, 3).length > 0 ? currentExecutives.slice(0, 3) : [
