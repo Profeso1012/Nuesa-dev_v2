@@ -220,7 +220,6 @@ export default function Events() {
 
   return (
     <div className="min-h-screen bg-white relative">
-      <BackgroundDecor />
       
       <div className="relative z-10">
         <Header />
