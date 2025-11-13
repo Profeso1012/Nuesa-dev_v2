@@ -74,7 +74,6 @@ export default function AerospaceDepartment() {
 
   return (
     <div className="min-h-screen bg-white relative">
-      <BackgroundDecor />
 
       <div className="relative z-10">
         <Header />
