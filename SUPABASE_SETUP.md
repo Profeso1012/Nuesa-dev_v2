@@ -16,6 +16,7 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key - keep secret and only use server-si
 3) Create DB tables
 
 - Open Supabase SQL Editor and run the SQL in supabase/schema.sql (copied into this repo).
+- For the partners feature, also run supabase/partners-schema.sql to create the partners table.
 
 4) Realtime and Storage (optional)
 
@@ -32,7 +33,14 @@ SUPABASE_SERVICE_ROLE_KEY=<service_role key - keep secret and only use server-si
 - After signup, profile data can be inserted into public.profiles via a server API (recommended)
   or via a SQL trigger.
 
-7) Optional SQL trigger example (create in SQL editor)
+7) Partners Management
+
+- The /partnerships page displays partner logos in a carousel
+- Admins can manage partners at /admin/dashboard after logging in at /login
+- Maximum of 4 partners can be added at a time
+- When more than 4 partners exist, the logos scroll continuously
+
+8) Optional SQL trigger example (create in SQL editor)
 
 -- insert profile on auth.user_created
 create function public.handle_new_user() returns trigger language plpgsql
@@ -48,13 +56,13 @@ create trigger on_auth_user_created
   for each row
   execute function public.handle_new_user();
 
-8) Run locally
+9) Run locally
 
 - Install dependencies: npm install
 - Create a local .env with the NEXT_PUBLIC variables above
 - Start dev server: npm run dev
 
-9) When deploying (Netlify/Vercel)
+10) When deploying (Netlify/Vercel)
 
 - Add the NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY as environment variables in your hosting provider.
 - For server-only service role operations, use serverless functions or API routes and set SUPABASE_SERVICE_ROLE_KEY in server envs.
