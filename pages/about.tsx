@@ -4,14 +4,13 @@ import Footer from "../components/Footer";
 import StayInTheLoop from "../components/StayInTheLoop";
 
 export default function About() {
-  const [leadersIndex, setLeadersIndex] = useState(0);
+
   const [adminsIndex, setAdminsIndex] = useState(0);
   const [pastLeadersIndex, setPastLeadersIndex] = useState(0);
 
   // Auto-scroll carousels
   useEffect(() => {
     const interval = setInterval(() => {
-      setLeadersIndex((prev) => (prev + 1) % 3);
       setAdminsIndex((prev) => (prev + 1) % 3);
       setPastLeadersIndex((prev) => (prev + 1) % 3);
     }, 5000);
