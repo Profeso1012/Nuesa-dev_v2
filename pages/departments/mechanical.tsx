@@ -171,8 +171,8 @@ export default function MechanicalDepartment() {
         </div>
       </section>
 
-        <StayInTheLoop />
-        <div className="w-full bg-[#E6731F] h-20"></div>
+      <StayInTheLoop />
+      <div className="w-full bg-[#E6731F] h-20"></div>
 
       <Footer />
       </div>
