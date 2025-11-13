@@ -16,8 +16,6 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setLeadersIndex((prev) => (prev + 1) % 3);
-      setAdminsIndex((prev) => (prev + 1) % 3);
-      setPastLeadersIndex((prev) => (prev + 1) % 3);
     }, 5000);
 
     return () => clearInterval(interval);
