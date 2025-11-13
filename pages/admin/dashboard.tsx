@@ -10,6 +10,34 @@ interface Partner {
   created_at: string;
 }
 
+interface Lecturer {
+  id: string;
+  name: string;
+  specialization: string;
+  department: string;
+  image_url: string;
+  created_at: string;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  department: string;
+  image_url: string;
+  event_date: string;
+  created_at: string;
+}
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  department: string;
+  image_url: string;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
