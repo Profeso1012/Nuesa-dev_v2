@@ -4,6 +4,9 @@ import Footer from '../../components/Footer';
 import StayInTheLoop from '../../components/StayInTheLoop';
 import BackgroundDecor from '../../components/BackgroundDecor';
 
+import { motion } from "framer-motion";
+import { FaTools, FaRocket, FaCogs, FaHourglassHalf } from "react-icons/fa";
+
 export default function AerospaceDepartment() {
   const [lecturerIndex, setLecturerIndex] = useState(0);
   const [selectedLevel, setSelectedLevel] = useState('all');
@@ -142,56 +145,61 @@ export default function AerospaceDepartment() {
         </div>
       </section>
 
-      {/* DEPARTMENTAL COURSES */}
-      <section className="w-full py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-24">
-          <h2 className="text-3xl md:text-4xl font-medium mb-10">
-            Departmental <span className="text-[#C45D16]">Courses</span>
-          </h2>
+        {/* COMING SOON SECTION */}
+        <section className="w-full py-24 md:py-32 bg-[rgba(196,93,22,0.1)] relative overflow-hidden">
+          <div className="max-w-5xl mx-auto px-6 md:px-24 text-center relative z-10">
+            <motion.h2
+              className="text-3xl md:text-4xl font-semibold text-[#C45D16] mb-6"
+              animate={{ opacity: [0.5, 1, 0.5], scale: [0.98, 1.02, 0.98] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              More Information on this Page Coming Soon...
+            </motion.h2>
 
-          <div className="space-y-6">
-            {/* FILTER */}
-            <div className="flex justify-end">
-              <div className="inline-flex items-center gap-2 px-5 py-3 rounded bg-[rgba(196,93,22,0.2)]">
-                <span className="text-[#5B933C] font-semibold text-sm">Filter by semester</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9L12 15L18 9" stroke="#5B933C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-
-            {/* TABLE HEADER */}
-            <div className="bg-[#5B933C] rounded-t-xl px-8 py-6">
-              <div className="grid grid-cols-5 gap-4 text-white text-center text-2xl font-medium">
-                <div>100 Level</div>
-                <div>200 Level</div>
-                <div>300 Level</div>
-                <div>400 Level</div>
-                <div>500 Level</div>
-              </div>
-            </div>
-
-            {/* TABLE ROWS */}
-            <div className="space-y-6">
-              {allCourses.map((row, idx) => (
-                <div key={idx} className="bg-[rgba(196,93,22,0.2)] px-4 py-4">
-                  <div className="grid grid-cols-5 gap-4">
-                    {['100', '200', '300', '400', '500'].map((level) => (
-                      <div key={level} className="flex justify-center items-center">
-                        <div className="text-center border-b border-[#E6731F] pb-2">
-                          <p className="text-base md:text-lg text-[#212121] whitespace-pre-line">
-                            {row[level as keyof typeof row]}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <motion.div
+              className="flex justify-center gap-8 text-[#E6731F] text-6xl mt-10"
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            >
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <FaTools />
+              </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 3, delay: 1, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <FaRocket />
+              </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }}
+                transition={{ duration: 3, delay: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <FaCogs />
+              </motion.div>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 3, delay: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <FaHourglassHalf />
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
-      </section>
+
+          {/* Subtle moving background circles */}
+          <motion.div
+            className="absolute top-0 left-0 w-72 h-72 bg-[#E6731F]/10 rounded-full blur-3xl"
+            animate={{ x: [0, 100, 0], y: [0, 50, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-0 right-0 w-80 h-80 bg-[#5B933C]/10 rounded-full blur-3xl"
+            animate={{ x: [0, -100, 0], y: [0, -50, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </section>
 
       {/* STAY IN THE LOOP */}
 
