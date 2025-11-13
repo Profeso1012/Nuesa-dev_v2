@@ -238,6 +238,8 @@ export default function Home() {
       {/* STAY IN THE LOOP */}
       <StayInTheLoop />
 
+      <div className="w-full bg-[#E6731F] h-20"></div>   
+
       <Footer />
     </div>
   );
