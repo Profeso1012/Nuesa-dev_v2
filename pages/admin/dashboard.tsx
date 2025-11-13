@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useRouter } from 'next/router';
 import Header from '../../components/Header';
+import ImageUploadComponent from '../../components/ImageUploadComponent';
 
 interface Partner {
   id: string;
@@ -38,7 +39,35 @@ interface GalleryItem {
   created_at: string;
 }
 
-type Tab = 'partners' | 'lecturers' | 'events' | 'gallery';
+interface Executive {
+  id: string;
+  name: string;
+  position: string;
+  bio: string;
+  email: string;
+  type: string;
+  council: string;
+  year: string;
+  image_url: string;
+  created_at: string;
+}
+
+interface DepartmentAdmin {
+  id: string;
+  name: string;
+  department: string;
+  bio: string;
+  image_url: string;
+  created_at: string;
+}
+
+interface AdminUser {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
+type Tab = 'partners' | 'lecturers' | 'events' | 'gallery' | 'executives' | 'department-admins' | 'admin-users';
 
 const departments = [
   { name: 'Mechanical Engineering', slug: 'mechanical' },
@@ -48,6 +77,9 @@ const departments = [
   { name: 'Civil Engineering', slug: 'civil' },
   { name: 'Industrial Engineering', slug: 'industrial' },
 ];
+
+const positions = ['Post 1', 'Post 2', 'Post 3', 'Post 4', 'Post 5', 'Post 6', 'Post 7', 'Post 8', 'Post 9'];
+const councils = ['SEC', 'SPC'];
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('partners');
@@ -89,6 +121,33 @@ export default function AdminDashboard() {
   });
   const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
 
+  // Executive state
+  const [executives, setExecutives] = useState<Executive[]>([]);
+  const [executiveForm, setExecutiveForm] = useState({
+    name: '',
+    position: 'Post 1',
+    bio: '',
+    email: '',
+    type: 'current',
+    council: 'SEC',
+    year: '',
+    image_url: '',
+  });
+  const [editingExecutiveId, setEditingExecutiveId] = useState<string | null>(null);
+
+  // Department Admin state
+  const [departmentAdmins, setDepartmentAdmins] = useState<DepartmentAdmin[]>([]);
+  const [departmentAdminForm, setDepartmentAdminForm] = useState({
+    name: '',
+    department: 'mechanical',
+    bio: '',
+    image_url: '',
+  });
+  const [editingDepartmentAdminId, setEditingDepartmentAdminId] = useState<string | null>(null);
+
+  // Admin Users state
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
@@ -103,6 +162,9 @@ export default function AdminDashboard() {
       else if (activeTab === 'lecturers') fetchLecturers();
       else if (activeTab === 'events') fetchEvents();
       else if (activeTab === 'gallery') fetchGalleryItems();
+      else if (activeTab === 'executives') fetchExecutives();
+      else if (activeTab === 'department-admins') fetchDepartmentAdmins();
+      else if (activeTab === 'admin-users') fetchAdminUsers();
     }
   }, [activeTab, token]);
 
@@ -184,6 +246,56 @@ export default function AdminDashboard() {
       setGalleryItems(data || []);
     } catch (error) {
       console.error('Error fetching gallery items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchExecutives = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('executives')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setExecutives(data || []);
+    } catch (error) {
+      console.error('Error fetching executives:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDepartmentAdmins = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('department_admins')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setDepartmentAdmins(data || []);
+    } catch (error) {
+      console.error('Error fetching department admins:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAdminUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch admin users');
+      const data = await response.json();
+      setAdminUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching admin users:', error);
     } finally {
       setLoading(false);
     }
@@ -410,6 +522,155 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveExecutive = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUploading(true);
+
+    try {
+      if (editingExecutiveId) {
+        const response = await fetch('/api/admin/executives', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id: editingExecutiveId, ...executiveForm }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update executive');
+      } else {
+        const response = await fetch('/api/admin/executives', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(executiveForm),
+        });
+
+        if (!response.ok) throw new Error('Failed to add executive');
+      }
+
+      setExecutiveForm({
+        name: '',
+        position: 'Post 1',
+        bio: '',
+        email: '',
+        type: 'current',
+        council: 'SEC',
+        year: '',
+        image_url: '',
+      });
+      setEditingExecutiveId(null);
+      fetchExecutives();
+      alert(editingExecutiveId ? 'Executive updated!' : 'Executive added!');
+    } catch (error: any) {
+      alert('Error: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteExecutive = async (id: string) => {
+    if (!confirm('Are you sure?')) return;
+
+    try {
+      const response = await fetch('/api/admin/executives', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete');
+      fetchExecutives();
+    } catch (error: any) {
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const handleSaveDepartmentAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUploading(true);
+
+    try {
+      if (editingDepartmentAdminId) {
+        const response = await fetch('/api/admin/department-admins', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id: editingDepartmentAdminId, ...departmentAdminForm }),
+        });
+
+        if (!response.ok) throw new Error('Failed to update department admin');
+      } else {
+        const response = await fetch('/api/admin/department-admins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(departmentAdminForm),
+        });
+
+        if (!response.ok) throw new Error('Failed to add department admin');
+      }
+
+      setDepartmentAdminForm({ name: '', department: 'mechanical', bio: '', image_url: '' });
+      setEditingDepartmentAdminId(null);
+      fetchDepartmentAdmins();
+      alert(editingDepartmentAdminId ? 'Department admin updated!' : 'Department admin added!');
+    } catch (error: any) {
+      alert('Error: ' + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteDepartmentAdmin = async (id: string) => {
+    if (!confirm('Are you sure?')) return;
+
+    try {
+      const response = await fetch('/api/admin/department-admins', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete');
+      fetchDepartmentAdmins();
+    } catch (error: any) {
+      alert('Error: ' + error.message);
+    }
+  };
+
+  const handleDeleteAdminUser = async (email: string) => {
+    if (!confirm('Are you sure you want to delete this admin user? This action cannot be undone.')) return;
+
+    try {
+      const response = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) throw new Error('Failed to delete');
+      fetchAdminUsers();
+    } catch (error: any) {
+      alert('Error: ' + error.message);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/login');
@@ -439,18 +700,18 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8 border-b border-gray-200">
-          {(['partners', 'lecturers', 'events', 'gallery'] as Tab[]).map((tab) => (
+        <div className="flex gap-2 mb-8 border-b border-gray-200 overflow-x-auto">
+          {(['partners', 'lecturers', 'events', 'gallery', 'executives', 'department-admins', 'admin-users'] as Tab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 font-semibold capitalize transition ${
+              className={`px-4 py-2 font-semibold capitalize transition whitespace-nowrap ${
                 activeTab === tab
                   ? 'text-[#E6731F] border-b-2 border-[#E6731F]'
                   : 'text-gray-600 hover:text-[#E6731F]'
               }`}
             >
-              {tab}
+              {tab === 'department-admins' ? 'Dept Admins' : tab === 'admin-users' ? 'Admin Users' : tab}
             </button>
           ))}
         </div>
@@ -528,21 +789,23 @@ export default function AdminDashboard() {
               </h2>
               <form onSubmit={handleSaveLecturer} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Name</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Name (Max 50 chars)</label>
                   <input
                     type="text"
                     value={lecturerForm.name}
-                    onChange={(e) => setLecturerForm({ ...lecturerForm, name: e.target.value })}
+                    onChange={(e) => setLecturerForm({ ...lecturerForm, name: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Specialization</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Specialization (Max 50 chars)</label>
                   <input
                     type="text"
                     value={lecturerForm.specialization}
-                    onChange={(e) => setLecturerForm({ ...lecturerForm, specialization: e.target.value })}
+                    onChange={(e) => setLecturerForm({ ...lecturerForm, specialization: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     required
                   />
@@ -561,16 +824,13 @@ export default function AdminDashboard() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Image URL</label>
-                  <input
-                    type="url"
-                    value={lecturerForm.image_url}
-                    onChange={(e) => setLecturerForm({ ...lecturerForm, image_url: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
+                <ImageUploadComponent
+                  onImageUrlChange={(url) => setLecturerForm({ ...lecturerForm, image_url: url })}
+                  currentImageUrl={lecturerForm.image_url}
+                  token={token}
+                  isUploading={uploading}
+                  onUploadStatusChange={setUploading}
+                />
                 <div className="flex gap-4">
                   <button
                     type="submit"
@@ -651,20 +911,22 @@ export default function AdminDashboard() {
               </h2>
               <form onSubmit={handleSaveEvent} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Title</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Title (Max 50 chars)</label>
                   <input
                     type="text"
                     value={eventForm.title}
-                    onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+                    onChange={(e) => setEventForm({ ...eventForm, title: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Description</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Description (Max 50 chars)</label>
                   <textarea
                     value={eventForm.description}
-                    onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+                    onChange={(e) => setEventForm({ ...eventForm, description: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     rows={4}
                   />
@@ -692,16 +954,13 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Image URL</label>
-                  <input
-                    type="url"
-                    value={eventForm.image_url}
-                    onChange={(e) => setEventForm({ ...eventForm, image_url: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
+                <ImageUploadComponent
+                  onImageUrlChange={(url) => setEventForm({ ...eventForm, image_url: url })}
+                  currentImageUrl={eventForm.image_url}
+                  token={token}
+                  isUploading={uploading}
+                  onUploadStatusChange={setUploading}
+                />
                 <div className="flex gap-4">
                   <button
                     type="submit"
@@ -788,20 +1047,22 @@ export default function AdminDashboard() {
               </h2>
               <form onSubmit={handleSaveGalleryItem} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Title</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Title (Max 50 chars)</label>
                   <input
                     type="text"
                     value={galleryForm.title}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Description</label>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Description (Max 50 chars)</label>
                   <textarea
                     value={galleryForm.description}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value })}
+                    onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value.slice(0, 50) })}
+                    maxLength={50}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
                     rows={4}
                   />
@@ -820,16 +1081,13 @@ export default function AdminDashboard() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#212121] mb-2">Image URL</label>
-                  <input
-                    type="url"
-                    value={galleryForm.image_url}
-                    onChange={(e) => setGalleryForm({ ...galleryForm, image_url: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
+                <ImageUploadComponent
+                  onImageUrlChange={(url) => setGalleryForm({ ...galleryForm, image_url: url })}
+                  currentImageUrl={galleryForm.image_url}
+                  token={token}
+                  isUploading={uploading}
+                  onUploadStatusChange={setUploading}
+                />
                 <div className="flex gap-4">
                   <button
                     type="submit"
@@ -899,6 +1157,335 @@ export default function AdminDashboard() {
               )}
             </div>
           </>
+        )}
+
+        {/* Executives Tab */}
+        {activeTab === 'executives' && (
+          <>
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">
+                {editingExecutiveId ? 'Edit Executive' : 'Add New Executive'}
+              </h2>
+              <form onSubmit={handleSaveExecutive} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Name (Max 50 chars)</label>
+                  <input
+                    type="text"
+                    value={executiveForm.name}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, name: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Position (Max 50 chars)</label>
+                  <select
+                    value={executiveForm.position}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, position: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                  >
+                    {positions.map((pos) => (
+                      <option key={pos} value={pos}>
+                        {pos}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Bio (Max 50 chars)</label>
+                  <textarea
+                    value={executiveForm.bio}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, bio: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={executiveForm.email}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Type</label>
+                  <select
+                    value={executiveForm.type}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, type: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                  >
+                    <option value="current">Current</option>
+                    <option value="past">Past</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Council</label>
+                  <select
+                    value={executiveForm.council}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, council: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                  >
+                    {councils.map((council) => (
+                      <option key={council} value={council}>
+                        {council}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Year (e.g., 2024/2025)</label>
+                  <input
+                    type="text"
+                    value={executiveForm.year}
+                    onChange={(e) => setExecutiveForm({ ...executiveForm, year: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    placeholder="2024/2025"
+                  />
+                </div>
+                <ImageUploadComponent
+                  onImageUrlChange={(url) => setExecutiveForm({ ...executiveForm, image_url: url })}
+                  currentImageUrl={executiveForm.image_url}
+                  token={token}
+                  isUploading={uploading}
+                  onUploadStatusChange={setUploading}
+                />
+                <div className="flex gap-4">
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="px-8 py-3 bg-[#E6731F] text-white rounded-lg font-semibold hover:bg-[#C45D16] disabled:opacity-50"
+                  >
+                    {uploading ? 'Saving...' : 'Save Executive'}
+                  </button>
+                  {editingExecutiveId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingExecutiveId(null);
+                        setExecutiveForm({
+                          name: '',
+                          position: 'Post 1',
+                          bio: '',
+                          email: '',
+                          type: 'current',
+                          council: 'SEC',
+                          year: '',
+                          image_url: '',
+                        });
+                      }}
+                      className="px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Executives</h2>
+              {executives.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No executives</div>
+              ) : (
+                <div className="space-y-4">
+                  {executives.map((executive) => (
+                    <div key={executive.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-[#212121]">{executive.name}</h3>
+                          <p className="text-sm text-gray-600">{executive.position}</p>
+                          <p className="text-sm text-gray-600">{executive.bio}</p>
+                          <p className="text-xs text-gray-500 mt-1">{executive.type} | {executive.council} {executive.year && `(${executive.year})`}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingExecutiveId(executive.id);
+                              setExecutiveForm({
+                                name: executive.name,
+                                position: executive.position,
+                                bio: executive.bio,
+                                email: executive.email,
+                                type: executive.type,
+                                council: executive.council,
+                                year: executive.year,
+                                image_url: executive.image_url,
+                              });
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteExecutive(executive.id)}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Department Admins Tab */}
+        {activeTab === 'department-admins' && (
+          <>
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">
+                {editingDepartmentAdminId ? 'Edit Department Administrator' : 'Add New Department Administrator'}
+              </h2>
+              <form onSubmit={handleSaveDepartmentAdmin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Name (Max 50 chars)</label>
+                  <input
+                    type="text"
+                    value={departmentAdminForm.name}
+                    onChange={(e) => setDepartmentAdminForm({ ...departmentAdminForm, name: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Department</label>
+                  <select
+                    value={departmentAdminForm.department}
+                    onChange={(e) => setDepartmentAdminForm({ ...departmentAdminForm, department: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                  >
+                    {departments.map((dept) => (
+                      <option key={dept.slug} value={dept.slug}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#212121] mb-2">Bio (Max 50 chars)</label>
+                  <textarea
+                    value={departmentAdminForm.bio}
+                    onChange={(e) => setDepartmentAdminForm({ ...departmentAdminForm, bio: e.target.value.slice(0, 50) })}
+                    maxLength={50}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#E6731F]"
+                    rows={3}
+                  />
+                </div>
+                <ImageUploadComponent
+                  onImageUrlChange={(url) => setDepartmentAdminForm({ ...departmentAdminForm, image_url: url })}
+                  currentImageUrl={departmentAdminForm.image_url}
+                  token={token}
+                  isUploading={uploading}
+                  onUploadStatusChange={setUploading}
+                />
+                <div className="flex gap-4">
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="px-8 py-3 bg-[#E6731F] text-white rounded-lg font-semibold hover:bg-[#C45D16] disabled:opacity-50"
+                  >
+                    {uploading ? 'Saving...' : 'Save Administrator'}
+                  </button>
+                  {editingDepartmentAdminId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingDepartmentAdminId(null);
+                        setDepartmentAdminForm({ name: '', department: 'mechanical', bio: '', image_url: '' });
+                      }}
+                      className="px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold hover:bg-gray-500"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-6">Department Administrators</h2>
+              {departmentAdmins.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No department administrators</div>
+              ) : (
+                <div className="space-y-4">
+                  {departmentAdmins.map((admin) => (
+                    <div key={admin.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-[#212121]">{admin.name}</h3>
+                          <p className="text-sm text-gray-600">
+                            {departments.find(d => d.slug === admin.department)?.name}
+                          </p>
+                          <p className="text-sm text-gray-600">{admin.bio}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingDepartmentAdminId(admin.id);
+                              setDepartmentAdminForm({
+                                name: admin.name,
+                                department: admin.department,
+                                bio: admin.bio,
+                                image_url: admin.image_url,
+                              });
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDepartmentAdmin(admin.id)}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Admin Users Tab */}
+        {activeTab === 'admin-users' && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold text-[#C45D16] mb-4">Admin Users Management</h2>
+              <p className="text-sm text-red-600 font-semibold">⚠️ Warning: Only remove admin accounts if you're certain the credentials have been compromised.</p>
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {adminUsers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No admin users</div>
+              ) : (
+                adminUsers.map((user) => (
+                  <div key={user.id} className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-[#212121]">{user.email}</p>
+                      <p className="text-xs text-gray-600">Created: {new Date(user.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteAdminUser(user.email)}
+                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>
