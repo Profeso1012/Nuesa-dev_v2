@@ -37,25 +37,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/admin/dashboard.js"
     ],
-    "/departments/aerospace": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/departments/aerospace.js"
-    ],
-    "/departments/mechanical": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/departments/mechanical.js"
-    ],
     "/events": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/events.js"
-    ],
-    "/partnerships": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/partnerships.js"
     ]
   },
   "ampFirstPages": []
