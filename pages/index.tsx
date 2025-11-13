@@ -4,9 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AboutUsSection from '../components/AboutUsSection';
 import StayInTheLoop from '../components/StayInTheLoop';
-
-
-
+import BackgroundDecor from '../components/BackgroundDecor';
 
 export default function Home() {
 
