@@ -134,12 +134,23 @@ export default function Header() {
             <Link href="/" className="font-medium text-sm py-2 hover:text-[#5B933C]">Home</Link>
             <Link href="/about" className="font-medium text-sm py-2 hover:text-[#5B933C]">About</Link>
             <Link href="/events" className="font-medium text-sm py-2 hover:text-[#5B933C]">Events</Link>
-            <Link href="/departments" className="font-medium text-sm py-2 hover:text-[#5B933C] flex items-center gap-1">
-              Aerospace Engineering
+            <div className="font-medium text-sm py-2 hover:text-[#5B933C] flex items-center gap-1">
+              {currentDeptName}
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M18 9L12 15L6 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+              <div className="absolute left-0 mt-2 w-64 bg-white shadow-lg rounded-lg border border-gray-200 py-2 z-50">
+                {departments.map((dept) => (
+                  <Link
+                    key={dept.slug}
+                    href={`/departments/${dept.slug}`}
+                    className="block px-4 py-2 text-sm hover:bg-gray-50"
+                  >
+                    {dept.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <Link href="/partnerships" className="font-medium text-sm py-2 hover:text-[#5B933C]">Partnerships</Link>
             <Link href="/contact" className="mt-4 px-3 py-2 border border-[#E6731F] text-[#E6731F] rounded text-center text-sm font-semibold">
               Contact Faculty Admin
