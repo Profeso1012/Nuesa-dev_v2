@@ -3,6 +3,8 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import StayInTheLoop from '../../components/StayInTheLoop';
 import BackgroundDecor from '../../components/BackgroundDecor';
+import ComingSoonSection from '../../components/ComingSoonSection';
+
 
 import { motion } from "framer-motion";
 import { FaTools, FaRocket, FaCogs, FaHourglassHalf } from "react-icons/fa";
@@ -145,56 +147,8 @@ export default function AerospaceDepartment() {
         </div>
       </section>
 
-      {/* DEPARTMENTAL COURSES */}
-      <section className="w-full py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-6 md:px-24">
-          <h2 className="text-3xl md:text-4xl font-medium mb-10">
-            Departmental <span className="text-[#C45D16]">Courses</span>
-          </h2>
+      <ComingSoonSection />
 
-          <div className="space-y-6">
-            {/* FILTER */}
-            <div className="flex justify-end">
-              <div className="inline-flex items-center gap-2 px-5 py-3 rounded bg-[rgba(196,93,22,0.2)]">
-                <span className="text-[#5B933C] font-semibold text-sm">Filter by semester</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9L12 15L18 9" stroke="#5B933C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-
-            {/* TABLE HEADER */}
-            <div className="bg-[#5B933C] rounded-t-xl px-8 py-6">
-              <div className="grid grid-cols-5 gap-4 text-white text-center text-2xl font-medium">
-                <div>100 Level</div>
-                <div>200 Level</div>
-                <div>300 Level</div>
-                <div>400 Level</div>
-                <div>500 Level</div>
-              </div>
-            </div>
-
-            {/* TABLE ROWS */}
-            <div className="space-y-6">
-              {allCourses.map((row, idx) => (
-                <div key={idx} className="bg-[rgba(196,93,22,0.2)] px-4 py-4">
-                  <div className="grid grid-cols-5 gap-4">
-                    {['100', '200', '300', '400', '500'].map((level) => (
-                      <div key={level} className="flex justify-center items-center">
-                        <div className="text-center border-b border-[#E6731F] pb-2">
-                          <p className="text-base md:text-lg text-[#212121] whitespace-pre-line">
-                            {row[level as keyof typeof row]}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* STAY IN THE LOOP */}
 
