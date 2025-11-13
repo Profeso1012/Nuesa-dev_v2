@@ -14,6 +14,7 @@ const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    // Verify authentication
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -23,21 +24,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
     if (req.method === 'POST') {
-      const { title, description, department, image_url, event_date } = req.body;
+      const { title, category, date, time, venue, form_link, image_url } = req.body;
 
-      if (!title || !department) {
-        return res.status(400).json({ error: 'Missing required fields' });
+      if (!title || !category || !date || !venue) {
+        return res.status(400).json({ error: 'Missing required fields: title, category, date, venue' });
       }
 
       const { data, error } = await supabaseAdmin
         .from('events')
-        .insert([{ title, description, department, image_url, event_date }])
+        .insert([{ title, category, date, time, venue, form_link, image_url }])
         .select();
 
       if (error) {
@@ -48,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'PUT') {
-      const { id, title, description, department, image_url, event_date } = req.body;
+      const { id, title, category, date, time, venue, form_link, image_url } = req.body;
 
       if (!id) {
         return res.status(400).json({ error: 'Missing event ID' });
@@ -56,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const { data, error } = await supabaseAdmin
         .from('events')
-        .update({ title, description, department, image_url, event_date, updated_at: new Date() })
+        .update({ title, category, date, time, venue, form_link, image_url, updated_at: new Date() })
         .eq('id', id)
         .select();
 
@@ -83,12 +84,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: error.message });
       }
 
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ message: 'Event deleted successfully' });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Server error:', error);
-    res.status(500).json({ error: error.message || 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 }
