@@ -5,8 +5,8 @@ import Link from 'next/link';
 const contacts = [
   {
     label: 'Gmail',
-    handle: 'nuesalasu@gmail.com',
-    href: 'mailto:nuesalasu@gmail.com',
+    handle: 'nuesalasu28th@gmail.com',
+    href: 'mailto:nuesalasu28th@gmail.com',
     icon: (
       <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
         <path d="M6 8h36c1.1 0 2 .9 2 2v28c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V10c0-1.1.9-2 2-2z" fill="#fff" stroke="#ddd"/>

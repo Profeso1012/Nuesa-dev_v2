@@ -84,7 +84,11 @@ export default function EventCarousel({ items, autoInterval = 4000 }: Props) {
   useEffect(() => {
     const measure = () => {
       if (containerRef.current) {
-        setCardWidth((containerRef.current.offsetWidth - GAP * 2) / 3);
+        const w = containerRef.current.offsetWidth;
+        const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth < 1024;
+        const cols = isMobile ? 1 : isTablet ? 2 : 3;
+        setCardWidth((w - GAP * (cols - 1)) / cols);
       }
     };
     measure();
@@ -110,9 +114,13 @@ export default function EventCarousel({ items, autoInterval = 4000 }: Props) {
 
   useEffect(() => { setStartIdx(0); setSliding(false); }, [items.length]);
 
+  const cols = typeof window !== 'undefined'
+    ? window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+    : 3;
+
   const cardStyle = cardWidth > 0
     ? { width: `${cardWidth}px`, flexShrink: 0 as const }
-    : { width: 'calc(33.333% - 22px)', flexShrink: 0 as const };
+    : { width: `calc((100% - ${GAP * (cols - 1)}px) / ${cols})`, flexShrink: 0 as const };
 
   return (
     <div>
@@ -123,7 +131,7 @@ export default function EventCarousel({ items, autoInterval = 4000 }: Props) {
           transform: `translateX(${cardWidth > 0 && sliding ? -(cardWidth + GAP) : 0}px)`,
           transition: cardWidth > 0 && sliding ? 'transform 0.5s ease-in-out' : 'none',
         }}>
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <div key={`${startIdx}-${i}`} style={cardStyle}>
               <Card item={getCard(i)} />
             </div>

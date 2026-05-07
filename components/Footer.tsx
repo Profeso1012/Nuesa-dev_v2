@@ -24,7 +24,7 @@ export default function Footer() {
 
           <div className="md:w-1/4">
             <h4 className="font-semibold mb-3">Contact Us</h4>
-            <div className="text-sm">nuesalasu@gmail.com</div>
+            <div className="text-sm">nuesalasu28th@gmail.com</div>
             <div className="text-sm mt-2">Phone: +234 802 929 9214</div>
             <div className="text-sm mt-2">Address: Lagos State University, Epe</div>
           </div>
@@ -54,7 +54,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-white/20 pt-6 text-center text-sm">© 2025 NUESA LASU. All rights reserved.</div>
+        <div className="mt-8 border-t border-white/20 pt-6 text-center text-sm">© 2026 NUESA LASU. All rights reserved.</div>
       </div>
     </footer>
   );

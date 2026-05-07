@@ -66,7 +66,7 @@ export default function Partnerships() {
       {/* Toast */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#212121] text-white px-6 py-3 rounded-lg shadow-lg text-sm font-medium animate-fade-in">
-          To become a partner, please contact the admin at nuesalasu@gmail.com
+          To become a partner, please contact the admin at nuesalasu28th@gmail.com
         </div>
       )}
       <Header />
@@ -203,7 +203,7 @@ export default function Partnerships() {
 
           <div className="flex flex-col sm:flex-row items-center gap-5">
             <button onClick={showToast} className="px-8 py-3.5 bg-[#E6731F] text-white rounded text-sm font-semibold shadow-md hover:bg-[#C45D16] transition-colors">Become A Partner</button>
-            <button onClick={showToast} className="px-8 py-3.5 border border-[#E6731F] text-[#E6731F] rounded text-sm font-semibold shadow-md hover:bg-[#E6731F] hover:text-white transition-colors">Contact Us</button>
+            <a href="https://wa.me/+2348029299214" target="_blank" rel="noopener noreferrer" className="px-8 py-3.5 border border-[#E6731F] text-[#E6731F] rounded text-sm font-semibold shadow-md hover:bg-[#E6731F] hover:text-white transition-colors text-center">Contact Us</a>
           </div>
         </div>
       </section>
@@ -221,67 +221,76 @@ export default function Partnerships() {
 }
 
 
-// Partner display logic: 1-5 static, 6+ continuous scroll rows
+// Partner display: always scrolling, one row until threshold, then add rows
+// Desktop: row threshold = 5, split size = 5 per row
+// Mobile: row threshold = 3, split size = 3 per row (handled via separate renders)
 function PartnerDisplay({ partners }: { partners: Partner[] }) {
   if (partners.length === 0) {
     return <div className="flex items-center justify-center py-12 text-[#212121] text-xl">No partners yet</div>;
   }
 
-  if (partners.length <= 5) {
-    return (
-      <div className="flex items-center justify-center gap-12 lg:gap-20 px-6 md:px-24 py-5">
-        {partners.map((p) => (
-          <div key={p.id} className="flex items-center justify-center">
-            <img src={p.logo_url} alt={p.name} className="h-24 lg:h-28 w-auto object-contain" />
-          </div>
+  return (
+    <>
+      {/* Desktop (sm+): rows of 5, scroll always */}
+      <div className="hidden sm:block space-y-8 py-4">
+        {chunk(partners, 5).map((row, idx) => (
+          <ScrollingRow key={`d-${idx}`} partners={row} direction={idx % 2 === 0 ? 'left' : 'right'} logoH="h-20 lg:h-24" itemW="200px" gap="60px" />
         ))}
       </div>
-    );
-  }
-
-  // 6+ partners: split into rows of 10, alternating directions
-  const rows: Partner[][] = [];
-  for (let i = 0; i < partners.length; i += 10) {
-    rows.push(partners.slice(i, i + 10));
-  }
-
-  return (
-    <div className="space-y-6">
-      {rows.map((row, idx) => (
-        <ScrollingRow key={idx} partners={row} direction={idx % 2 === 0 ? 'left' : 'right'} />
-      ))}
-    </div>
+      {/* Mobile: rows of 3, scroll always */}
+      <div className="block sm:hidden space-y-8 py-4">
+        {chunk(partners, 3).map((row, idx) => (
+          <ScrollingRow key={`m-${idx}`} partners={row} direction={idx % 2 === 0 ? 'left' : 'right'} logoH="h-28" itemW="130px" gap="40px" />
+        ))}
+      </div>
+    </>
   );
 }
 
-function ScrollingRow({ partners, direction }: { partners: Partner[]; direction: 'left' | 'right' }) {
-  // Duplicate 3x for seamless loop
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function ScrollingRow({ partners, direction, logoH, itemW, gap }: {
+  partners: Partner[];
+  direction: 'left' | 'right';
+  logoH: string;
+  itemW: string;
+  gap: string;
+}) {
+  // Triple the array so the loop is seamless — animation moves exactly 1/3
   const tripled = [...partners, ...partners, ...partners];
+  const animName = direction === 'left' ? 'nuesa-scroll-left' : 'nuesa-scroll-right';
 
   return (
     <div className="relative w-full overflow-hidden">
       <style jsx>{`
-        @keyframes scroll-left {
+        @keyframes nuesa-scroll-left {
           from { transform: translateX(0); }
-          to { transform: translateX(-33.333%); }
+          to   { transform: translateX(-33.3333%); }
         }
-        @keyframes scroll-right {
-          from { transform: translateX(-33.333%); }
-          to { transform: translateX(0); }
+        @keyframes nuesa-scroll-right {
+          from { transform: translateX(-33.3333%); }
+          to   { transform: translateX(0); }
         }
-        .scroll-left { animation: scroll-left 20s linear infinite; }
-        .scroll-right { animation: scroll-right 20s linear infinite; }
+        .nuesa-scroll-left  { animation: nuesa-scroll-left  18s linear infinite; }
+        .nuesa-scroll-right { animation: nuesa-scroll-right 18s linear infinite; }
       `}</style>
-      <div className={`flex items-center gap-16 ${direction === 'left' ? 'scroll-left' : 'scroll-right'}`}>
+      <div
+        className={direction === 'left' ? 'nuesa-scroll-left' : 'nuesa-scroll-right'}
+        style={{ display: 'flex', alignItems: 'center', gap, width: 'max-content' }}
+      >
         {tripled.map((p, i) => (
-          <div key={`${p.id}-${i}`} className="flex-shrink-0 flex items-center justify-center" style={{ minWidth: '180px' }}>
-            <img src={p.logo_url} alt={p.name} className="h-20 lg:h-24 w-auto object-contain"
-              loading="lazy" />
+          <div key={`${p.id}-${i}`} style={{ width: itemW, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src={p.logo_url} alt={p.name} className={`${logoH} w-auto object-contain`} loading="lazy" />
           </div>
         ))}
       </div>
     </div>
   );
 }
+
 
 
