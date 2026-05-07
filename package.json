@@ -19,13 +19,14 @@
     "format.fix": "prettier --write ."
   },
   "dependencies": {
-    "@next/font": "^14.2.15",
     "@supabase/supabase-js": "^2.31.0",
     "dotenv": "^17.2.0",
     "express": "^4.18.2",
-    "next": "^13.5.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "formidable": "^3.5.4",
+    "next": "15.5.15",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -57,7 +58,7 @@
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
-    "@react-three/drei": "^10.1.2",
+    "@react-three/drei": "^9.1.2",
     "@react-three/fiber": "^8.18.0",
     "@swc/core": "^1.11.24",
     "@tailwindcss/typography": "^0.5.15",
@@ -95,7 +96,6 @@
     "three": "^0.176.0",
     "tsx": "^4.7.0",
     "typescript": "^5.5.3",
-    "vite": "^6.2.2",
-    "vitest": "^3.1.4"
+    "vite": "^8.0.10"
   }
 }
